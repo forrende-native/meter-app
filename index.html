@@ -103,6 +103,11 @@
         <input type="file" id="restoreFile" accept="application/json" hidden>
       </label>
       <hr>
+      <h2>สำรองขึ้น Google Drive</h2>
+      <p class="hint" id="driveStatus">ยังไม่ได้เชื่อมต่อ Google Drive</p>
+      <button id="driveConnectBtn" class="btn-secondary">🔗 เชื่อมต่อ Google Drive</button>
+      <button id="driveBackupBtn" class="btn-primary" style="display:none;">☁️ สำรองขึ้น Drive ตอนนี้</button>
+      <hr>
       <button id="clearAllBtn" class="btn-danger">🗑 ล้างข้อมูลทั้งหมด</button>
     </div>
   </section>
@@ -110,8 +115,10 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="xlsx.full.min.js"></script>
 <script src="seed_meters.js"></script>
 <script src="app.js"></script>
+<script src="drive.js"></script>
 </body>
 </html>

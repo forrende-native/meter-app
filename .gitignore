@@ -5,3 +5,4 @@ export_rooms.py
 export_meters_import.py
 server.log
 *.pyc
+client_secret_*.json

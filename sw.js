@@ -1,9 +1,10 @@
-const CACHE_NAME = 'meterapp-v4';
+const CACHE_NAME = 'meterapp-v5';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './drive.js',
   './manifest.json',
   './xlsx.full.min.js',
   './seed_meters.js',
