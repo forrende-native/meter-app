@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>จดมิเตอร์</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1565c0">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>📟 จดมิเตอร์</h1>
+  <span id="offlineBadge" class="badge">ออฟไลน์พร้อมใช้</span>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="readings">บันทึก</button>
+  <button class="tab-btn" data-tab="meters">มิเตอร์/ห้อง</button>
+  <button class="tab-btn" data-tab="history">ประวัติ</button>
+  <button class="tab-btn" data-tab="export">Export</button>
+</nav>
+
+<main>
+  <!-- TAB: บันทึกค่ามิเตอร์ -->
+  <section id="tab-readings" class="tab-content active">
+    <div class="card">
+      <h2>บันทึกค่ามิเตอร์ใหม่</h2>
+      <label>เลือกตึก</label>
+      <select id="buildingSelect"></select>
+
+      <label>เลือกมิเตอร์/ห้อง</label>
+      <select id="meterSelect"></select>
+
+      <div id="prevInfo" class="prev-info"></div>
+
+      <label>วันที่จด</label>
+      <input type="date" id="readingDate">
+
+      <label>เลขมิเตอร์ปัจจุบัน</label>
+      <input type="number" step="0.01" id="currentReading" placeholder="เช่น 1234.5">
+
+      <label>หมายเหตุ (ถ้ามี)</label>
+      <input type="text" id="readingNote" placeholder="เช่น เปลี่ยนมิเตอร์ใหม่">
+
+      <div id="calcPreview" class="calc-preview"></div>
+
+      <button id="saveReadingBtn" class="btn-primary">บันทึก</button>
+    </div>
+  </section>
+
+  <!-- TAB: จัดการมิเตอร์/ห้อง -->
+  <section id="tab-meters" class="tab-content">
+    <div class="card">
+      <h2>เพิ่มมิเตอร์/ห้องใหม่</h2>
+      <label>ตึก</label>
+      <input type="text" id="meterBuilding" placeholder="เช่น เพิ่มทรัพย์">
+      <label>ชื่อห้อง/จุดวัด</label>
+      <input type="text" id="meterName" placeholder="เช่น ห้อง 101">
+      <label>ประเภท</label>
+      <select id="meterType">
+        <option value="electric">ไฟฟ้า</option>
+        <option value="water">น้ำ</option>
+      </select>
+      <label>อัตราค่าบริการต่อหน่วย (บาท)</label>
+      <input type="number" step="0.01" id="meterRate" value="8">
+      <button id="addMeterBtn" class="btn-primary">เพิ่ม</button>
+    </div>
+    <div class="card" id="importCard">
+      <h2>นำเข้ารายชื่อห้องจากฐานข้อมูลหอพัก</h2>
+      <p class="hint">พบรายชื่อห้องจากฐานข้อมูล dorm — นำเข้าเป็นมิเตอร์น้ำ+ไฟแยกคนละรายการต่อห้องได้ทันที</p>
+      <button id="importSeedBtn" class="btn-secondary">📥 นำเข้า 242 มิเตอร์ (121 ห้อง)</button>
+    </div>
+    <div class="card">
+      <h2>รายการมิเตอร์/ห้อง</h2>
+      <div id="meterList" class="list"></div>
+    </div>
+  </section>
+
+  <!-- TAB: ประวัติ -->
+  <section id="tab-history" class="tab-content">
+    <div class="card">
+      <h2>ประวัติการจด</h2>
+      <label>กรองตามมิเตอร์/ห้อง</label>
+      <select id="historyFilter"></select>
+      <div id="historyList" class="list"></div>
+    </div>
+  </section>
+
+  <!-- TAB: Export -->
+  <section id="tab-export" class="tab-content">
+    <div class="card">
+      <h2>Export ข้อมูล</h2>
+      <p class="hint">ส่งออกข้อมูลทั้งหมด (ทุกมิเตอร์/ห้อง) เป็นไฟล์ ใช้งานได้แม้ออฟไลน์</p>
+      <button id="exportExcelBtn" class="btn-primary">⬇ Export Excel (.xlsx)</button>
+      <button id="exportCsvBtn" class="btn-secondary">⬇ Export CSV</button>
+      <hr>
+      <h2>สำรอง/กู้คืนข้อมูล</h2>
+      <button id="backupBtn" class="btn-secondary">💾 สำรองข้อมูล (JSON)</button>
+      <label class="file-label">📂 กู้คืนจากไฟล์ JSON
+        <input type="file" id="restoreFile" accept="application/json" hidden>
+      </label>
+      <hr>
+      <button id="clearAllBtn" class="btn-danger">🗑 ล้างข้อมูลทั้งหมด</button>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script src="xlsx.full.min.js"></script>
+<script src="seed_meters.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

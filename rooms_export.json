@@ -1,0 +1,977 @@
+{
+  "buildings": {
+    "seed1x1": "เพิ่มทรัพย์",
+    "seedtx29": "ปานมณี",
+    "seed2ax82": "บ้านเช่า"
+  },
+  "rooms": [
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "101",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "102",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "103",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "104",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "105",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "106",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "107",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "108",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "109",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "201",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "202",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "203",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "204",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "205",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "206",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "207",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "208",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "209",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "301",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "302",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "303",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "304",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "305",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "306",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "307",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "308",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed1x1",
+      "buildingName": "เพิ่มทรัพย์",
+      "code": "309",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A1",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A10",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A11",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A12",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A13",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A14",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A15",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A16",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A17",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A18",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A19",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A2",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A20",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A3",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A4",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A5",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A6",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A7",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A8",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "A9",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B1",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B10",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B11",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B12",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B13",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B14",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B15",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B16",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B17",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B18",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B19",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B2",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B20",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B3",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B4",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B5",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B6",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B7",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B8",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "B9",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "C1",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seed2ax82",
+      "buildingName": "บ้านเช่า",
+      "code": "C2",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "101",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "102",
+      "floor": 1,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "201",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "202",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "203",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "204",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "205",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "206",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "207",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "208",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "209",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "210",
+      "floor": 2,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "301",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "302",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "303",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "304",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "305",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "306",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "307",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "308",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "309",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "310",
+      "floor": 3,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "401",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "402",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "403",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "404",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "405",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "406",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "407",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "408",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "409",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "410",
+      "floor": 4,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "501",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "502",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "503",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "504",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "505",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "506",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "507",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "508",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "509",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "510",
+      "floor": 5,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "601",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "602",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "603",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "604",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "605",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "606",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "607",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "608",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "609",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    },
+    {
+      "buildingId": "seedtx29",
+      "buildingName": "ปานมณี",
+      "code": "610",
+      "floor": 6,
+      "type": "มาตรฐาน",
+      "status": "vacant"
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+// ===== Storage =====
+const DB_KEY = 'meterapp_db_v1';
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (!raw) return { meters: [], readings: [] };
+    return JSON.parse(raw);
+  } catch (e) {
+    return { meters: [], readings: [] };
+  }
+}
+function saveDB(db) {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+let db = loadDB();
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ===== Toast =====
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ===== Tabs =====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'history') renderHistory();
+    if (btn.dataset.tab === 'meters') renderMeterList();
+    if (btn.dataset.tab === 'readings') { populateBuildingSelect(); populateMeterSelect(); updatePrevInfo(); }
+  });
+});
+
+// ===== Meters =====
+function addMeter(name, type, rate, building) {
+  const m = { id: uid(), name, type, rate: parseFloat(rate) || 0, building: building || '', createdAt: new Date().toISOString() };
+  db.meters.push(m);
+  saveDB(db);
+  return m;
+}
+
+function getBuildings() {
+  const set = new Set(db.meters.map(m => m.building || 'ไม่ระบุตึก'));
+  return Array.from(set).sort();
+}
+
+function populateBuildingSelect() {
+  const sel = document.getElementById('buildingSelect');
+  if (!sel) return;
+  const prevVal = sel.value;
+  const buildings = getBuildings();
+  sel.innerHTML = '<option value="">ทั้งหมด</option>';
+  buildings.forEach(b => sel.appendChild(new Option(b, b)));
+  if (prevVal && buildings.includes(prevVal)) sel.value = prevVal;
+}
+
+function populateMeterSelect() {
+  const sel = document.getElementById('meterSelect');
+  const histSel = document.getElementById('historyFilter');
+  const buildingSel = document.getElementById('buildingSelect');
+  const selectedBuilding = buildingSel ? buildingSel.value : '';
+  const prevVal = sel.value;
+  sel.innerHTML = '';
+  histSel.innerHTML = '<option value="">ทั้งหมด</option>';
+  if (db.meters.length === 0) {
+    sel.innerHTML = '<option value="">-- ยังไม่มีมิเตอร์ เพิ่มที่แท็บ "มิเตอร์/ห้อง" --</option>';
+    return;
+  }
+  const filtered = selectedBuilding
+    ? db.meters.filter(m => (m.building || 'ไม่ระบุตึก') === selectedBuilding)
+    : db.meters;
+  if (filtered.length === 0) {
+    sel.innerHTML = '<option value="">-- ไม่มีมิเตอร์ในตึกนี้ --</option>';
+  } else {
+    filtered.forEach(m => {
+      const label = `${m.name} (${m.type === 'water' ? 'น้ำ' : 'ไฟ'})`;
+      sel.appendChild(new Option(label, m.id));
+    });
+  }
+  db.meters.forEach(m => {
+    const label = `${m.building ? m.building + ' ' : ''}${m.name} (${m.type === 'water' ? 'น้ำ' : 'ไฟ'})`;
+    histSel.appendChild(new Option(label, m.id));
+  });
+  if (prevVal) sel.value = prevVal;
+}
+
+document.getElementById('buildingSelect').addEventListener('change', () => {
+  populateMeterSelect();
+  updatePrevInfo();
+});
+
+function renderMeterList() {
+  const wrap = document.getElementById('meterList');
+  wrap.innerHTML = '';
+  if (db.meters.length === 0) {
+    wrap.innerHTML = '<p class="hint">ยังไม่มีมิเตอร์/ห้อง</p>';
+    return;
+  }
+  db.meters.forEach(m => {
+    const count = db.readings.filter(r => r.meterId === m.id).length;
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.innerHTML = `
+      <div>
+        <div>${m.building ? escapeHtml(m.building) + ' — ' : ''}${escapeHtml(m.name)} — ${m.type === 'water' ? 'น้ำ' : 'ไฟ'}</div>
+        <div class="meta">อัตรา ${m.rate} บาท/หน่วย · ${count} รายการจด</div>
+      </div>
+      <button class="del-btn" data-id="${m.id}">✕</button>
+    `;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('.del-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      if (!confirm('ลบมิเตอร์นี้? ประวัติการจดของมิเตอร์นี้จะถูกลบด้วย')) return;
+      const id = b.dataset.id;
+      db.meters = db.meters.filter(m => m.id !== id);
+      db.readings = db.readings.filter(r => r.meterId !== id);
+      saveDB(db);
+      renderMeterList();
+      populateMeterSelect();
+      toast('ลบแล้ว');
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const importBtn = document.getElementById('importSeedBtn');
+const importCard = document.getElementById('importCard');
+if (!window.SEED_METERS || !window.SEED_METERS.length) {
+  if (importCard) importCard.style.display = 'none';
+} else if (importBtn) {
+  importBtn.addEventListener('click', () => {
+    const existingKeys = new Set(db.meters.map(m => `${m.building}|${m.name}|${m.type}`));
+    const toAdd = window.SEED_METERS.filter(s => !existingKeys.has(`${s.building}|${s.name}|${s.type}`));
+    if (toAdd.length === 0) {
+      toast('นำเข้าไปหมดแล้ว (ไม่มีรายการใหม่)');
+      return;
+    }
+    if (!confirm(`นำเข้า ${toAdd.length} มิเตอร์ใหม่ (ทั้งหมด ${window.SEED_METERS.length} รายการ, มีอยู่แล้ว ${window.SEED_METERS.length - toAdd.length})?`)) return;
+    toAdd.forEach(s => addMeter(s.name, s.type, s.rate, s.building));
+    renderMeterList();
+    populateBuildingSelect();
+    populateMeterSelect();
+    toast(`นำเข้าแล้ว ${toAdd.length} มิเตอร์`);
+  });
+}
+
+document.getElementById('addMeterBtn').addEventListener('click', () => {
+  const name = document.getElementById('meterName').value.trim();
+  const type = document.getElementById('meterType').value;
+  const rate = document.getElementById('meterRate').value;
+  const building = document.getElementById('meterBuilding').value.trim();
+  if (!name) { toast('กรุณากรอกชื่อห้อง/จุดวัด'); return; }
+  addMeter(name, type, rate, building);
+  document.getElementById('meterName').value = '';
+  document.getElementById('meterBuilding').value = '';
+  renderMeterList();
+  populateBuildingSelect();
+  populateMeterSelect();
+  toast('เพิ่มมิเตอร์แล้ว');
+});
+
+// ===== Readings =====
+function getLastReading(meterId) {
+  const list = db.readings.filter(r => r.meterId === meterId).sort((a, b) => a.date.localeCompare(b.date));
+  return list.length ? list[list.length - 1] : null;
+}
+
+function updatePrevInfo() {
+  const meterId = document.getElementById('meterSelect').value;
+  const prevBox = document.getElementById('prevInfo');
+  if (!meterId) { prevBox.style.display = 'none'; return; }
+  const last = getLastReading(meterId);
+  if (last) {
+    prevBox.style.display = 'block';
+    prevBox.innerHTML = `ค่าครั้งก่อน: <b>${last.value}</b> (วันที่ ${last.date})`;
+  } else {
+    prevBox.style.display = 'block';
+    prevBox.innerHTML = 'ยังไม่มีค่าก่อนหน้า (รายการแรก)';
+  }
+  updateCalcPreview();
+}
+
+function updateCalcPreview() {
+  const meterId = document.getElementById('meterSelect').value;
+  const curVal = parseFloat(document.getElementById('currentReading').value);
+  const box = document.getElementById('calcPreview');
+  if (!meterId || isNaN(curVal)) { box.style.display = 'none'; return; }
+  const meter = db.meters.find(m => m.id === meterId);
+  const last = getLastReading(meterId);
+  const prevVal = last ? last.value : 0;
+  const consumed = curVal - prevVal;
+  const cost = consumed * (meter ? meter.rate : 0);
+  box.style.display = 'block';
+  box.innerHTML = `หน่วยที่ใช้: <b>${consumed.toFixed(2)}</b> หน่วย &nbsp;|&nbsp; ค่าใช้จ่าย: <b>${cost.toFixed(2)} บาท</b>`;
+}
+
+document.getElementById('meterSelect').addEventListener('change', updatePrevInfo);
+document.getElementById('currentReading').addEventListener('input', updateCalcPreview);
+
+// default date = today
+document.getElementById('readingDate').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('saveReadingBtn').addEventListener('click', () => {
+  const meterId = document.getElementById('meterSelect').value;
+  const date = document.getElementById('readingDate').value;
+  const value = parseFloat(document.getElementById('currentReading').value);
+  const note = document.getElementById('readingNote').value.trim();
+  if (!meterId) { toast('กรุณาเลือกมิเตอร์/ห้องก่อน'); return; }
+  if (!date) { toast('กรุณาเลือกวันที่'); return; }
+  if (isNaN(value)) { toast('กรุณากรอกเลขมิเตอร์'); return; }
+
+  const meter = db.meters.find(m => m.id === meterId);
+  const last = getLastReading(meterId);
+  const prevVal = last ? last.value : 0;
+  const consumed = value - prevVal;
+  const cost = consumed * (meter ? meter.rate : 0);
+
+  db.readings.push({
+    id: uid(),
+    meterId,
+    date,
+    value,
+    prevValue: prevVal,
+    consumed,
+    rate: meter ? meter.rate : 0,
+    cost,
+    note,
+    createdAt: new Date().toISOString(),
+  });
+  saveDB(db);
+  document.getElementById('currentReading').value = '';
+  document.getElementById('readingNote').value = '';
+  updatePrevInfo();
+  toast('บันทึกแล้ว ✓');
+});
+
+// ===== History =====
+document.getElementById('historyFilter').addEventListener('change', renderHistory);
+
+function renderHistory() {
+  const wrap = document.getElementById('historyList');
+  const filterId = document.getElementById('historyFilter').value;
+  let list = [...db.readings].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+  if (filterId) list = list.filter(r => r.meterId === filterId);
+  wrap.innerHTML = '';
+  if (list.length === 0) {
+    wrap.innerHTML = '<p class="hint">ยังไม่มีประวัติการจด</p>';
+    return;
+  }
+  list.forEach(r => {
+    const meter = db.meters.find(m => m.id === r.meterId);
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    const label = meter ? `${meter.building ? meter.building + ' — ' : ''}${meter.name} (${meter.type === 'water' ? 'น้ำ' : 'ไฟ'})` : '(ลบแล้ว)';
+    div.innerHTML = `
+      <div>
+        <div>${escapeHtml(label)} — ${r.value}</div>
+        <div class="meta">${r.date} · ใช้ ${r.consumed.toFixed(2)} หน่วย · ${r.cost.toFixed(2)} บาท${r.note ? ' · ' + escapeHtml(r.note) : ''}</div>
+      </div>
+      <button class="del-btn" data-id="${r.id}">✕</button>
+    `;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('.del-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      if (!confirm('ลบรายการนี้?')) return;
+      db.readings = db.readings.filter(r => r.id !== b.dataset.id);
+      saveDB(db);
+      renderHistory();
+      toast('ลบแล้ว');
+    });
+  });
+}
+
+// ===== Export =====
+function buildExportRows() {
+  const rows = [...db.readings].sort((a, b) => a.date.localeCompare(b.date)).map(r => {
+    const meter = db.meters.find(m => m.id === r.meterId);
+    return {
+      'ตึก': meter ? (meter.building || '') : '',
+      'ห้อง/มิเตอร์': meter ? meter.name : '(ลบแล้ว)',
+      'ประเภท': meter ? (meter.type === 'water' ? 'น้ำ' : 'ไฟ') : '',
+      'วันที่': r.date,
+      'เลขครั้งก่อน': r.prevValue,
+      'เลขครั้งนี้': r.value,
+      'หน่วยที่ใช้': Number(r.consumed.toFixed(2)),
+      'อัตรา(บาท/หน่วย)': r.rate,
+      'ค่าใช้จ่าย(บาท)': Number(r.cost.toFixed(2)),
+      'หมายเหตุ': r.note || '',
+    };
+  });
+  return rows;
+}
+
+document.getElementById('exportExcelBtn').addEventListener('click', () => {
+  const rows = buildExportRows();
+  if (rows.length === 0) { toast('ยังไม่มีข้อมูลให้ export'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:14},{wch:16},{wch:8},{wch:12},{wch:14},{wch:14},{wch:12},{wch:16},{wch:14},{wch:20}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'ข้อมูลมิเตอร์');
+  const fname = `meter-readings-${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fname);
+  toast('Export Excel แล้ว');
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  const rows = buildExportRows();
+  if (rows.length === 0) { toast('ยังไม่มีข้อมูลให้ export'); return; }
+  const headers = Object.keys(rows[0]);
+  const csvLines = [headers.join(',')];
+  rows.forEach(r => {
+    csvLines.push(headers.map(h => {
+      const v = String(r[h] ?? '');
+      return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }).join(','));
+  });
+  const csv = '\uFEFF' + csvLines.join('\r\n'); // BOM for Thai in Excel
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `meter-readings-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Export CSV แล้ว');
+});
+
+// ===== Backup / Restore =====
+document.getElementById('backupBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `meter-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('สำรองข้อมูลแล้ว');
+});
+
+document.getElementById('restoreFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data.meters || !data.readings) throw new Error('invalid');
+      if (!confirm('การกู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ดำเนินการต่อ?')) return;
+      db = data;
+      saveDB(db);
+      populateBuildingSelect();
+      populateMeterSelect();
+      renderMeterList();
+      renderHistory();
+      toast('กู้คืนข้อมูลแล้ว');
+    } catch (err) {
+      toast('ไฟล์ไม่ถูกต้อง');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+  if (!confirm('ล้างข้อมูลทั้งหมด? การกระทำนี้ย้อนกลับไม่ได้ (แนะนำสำรองข้อมูลก่อน)')) return;
+  db = { meters: [], readings: [] };
+  saveDB(db);
+  populateBuildingSelect();
+  populateMeterSelect();
+  renderMeterList();
+  renderHistory();
+  toast('ล้างข้อมูลแล้ว');
+});
+
+// ===== Offline badge =====
+function updateOnlineStatus() {
+  const badge = document.getElementById('offlineBadge');
+  if (navigator.onLine) {
+    badge.textContent = 'ออฟไลน์พร้อมใช้';
+    badge.classList.remove('offline-now');
+  } else {
+    badge.textContent = 'ออฟไลน์ (ไม่มีเน็ต)';
+    badge.classList.add('offline-now');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ===== Service Worker (for installable offline PWA) =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// ===== Auto-import on first run (ถ้ายังไม่มีมิเตอร์เลย) =====
+if (db.meters.length === 0 && window.SEED_METERS && window.SEED_METERS.length) {
+  window.SEED_METERS.forEach(s => addMeter(s.name, s.type, s.rate, s.building));
+  setTimeout(() => toast(`นำเข้าอัตโนมัติ ${window.SEED_METERS.length} มิเตอร์จากฐานข้อมูลหอพัก`), 300);
+}
+
+// ===== Init =====
+populateBuildingSelect();
+populateMeterSelect();
+updatePrevInfo();
+renderMeterList();
+renderHistory();

@@ -1,0 +1,1456 @@
+// Auto-generated from dorm database (D:\OneDrive - Rende Development Co., Ltd\0.b\dorm)
+// 121 rooms x 2 meters (water+electric) = 242 meters
+window.SEED_METERS = [
+  {
+    "name": "ห้อง A1",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A1",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A10",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A10",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A11",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A11",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A12",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A12",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A13",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A13",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A14",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A14",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A15",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A15",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A16",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A16",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A17",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A17",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A18",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A18",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A19",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A19",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A2",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A2",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A20",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A20",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A3",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A3",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A4",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A4",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A5",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A5",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A6",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A6",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A7",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A7",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A8",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A8",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A9",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง A9",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B1",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B1",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B10",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B10",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B11",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B11",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B12",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B12",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B13",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B13",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B14",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B14",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B15",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B15",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B16",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B16",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B17",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B17",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B18",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B18",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B19",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B19",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B2",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B2",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B20",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B20",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B3",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B3",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B4",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B4",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B5",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B5",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B6",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B6",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B7",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B7",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B8",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B8",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B9",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง B9",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง C1",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง C1",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง C2",
+    "type": "water",
+    "rate": 18,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง C2",
+    "type": "electric",
+    "rate": 8,
+    "building": "บ้านเช่า"
+  },
+  {
+    "name": "ห้อง 101",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 101",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 102",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 102",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 201",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 201",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 202",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 202",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 203",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 203",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 204",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 204",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 205",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 205",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 206",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 206",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 207",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 207",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 208",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 208",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 209",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 209",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 210",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 210",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 301",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 301",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 302",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 302",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 303",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 303",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 304",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 304",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 305",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 305",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 306",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 306",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 307",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 307",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 308",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 308",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 309",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 309",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 310",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 310",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 401",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 401",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 402",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 402",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 403",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 403",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 404",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 404",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 405",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 405",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 406",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 406",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 407",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 407",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 408",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 408",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 409",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 409",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 410",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 410",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 501",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 501",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 502",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 502",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 503",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 503",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 504",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 504",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 505",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 505",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 506",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 506",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 507",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 507",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 508",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 508",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 509",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 509",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 510",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 510",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 601",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 601",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 602",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 602",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 603",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 603",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 604",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 604",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 605",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 605",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 606",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 606",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 607",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 607",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 608",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 608",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 609",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 609",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 610",
+    "type": "water",
+    "rate": 18,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 610",
+    "type": "electric",
+    "rate": 8,
+    "building": "ปานมณี"
+  },
+  {
+    "name": "ห้อง 101",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 101",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 102",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 102",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 103",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 103",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 104",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 104",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 105",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 105",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 106",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 106",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 107",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 107",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 108",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 108",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 109",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 109",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 201",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 201",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 202",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 202",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 203",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 203",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 204",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 204",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 205",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 205",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 206",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 206",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 207",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 207",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 208",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 208",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 209",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 209",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 301",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 301",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 302",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 302",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 303",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 303",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 304",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 304",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 305",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 305",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 306",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 306",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 307",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 307",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 308",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 308",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 309",
+    "type": "water",
+    "rate": 18,
+    "building": "เพิ่มทรัพย์"
+  },
+  {
+    "name": "ห้อง 309",
+    "type": "electric",
+    "rate": 8,
+    "building": "เพิ่มทรัพย์"
+  }
+];
