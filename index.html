@@ -103,6 +103,10 @@
         <input type="file" id="restoreFile" accept="application/json" hidden>
       </label>
       <hr>
+      <h2>ซิงก์ขึ้น Google Sheet</h2>
+      <p class="hint" id="sheetSyncStatus">ยังไม่ได้ตั้งค่า Google Sheet sync</p>
+      <p class="hint">บันทึกมิเตอร์แต่ละครั้งจะคิวส่งขึ้น Google Sheet อัตโนมัติเมื่อมีเน็ต (ยังจดออฟไลน์ได้ตามปกติ รอซิงก์ทีหลัง)</p>
+      <hr>
       <h2>สำรองขึ้น Google Drive</h2>
       <p class="hint" id="driveStatus">ยังไม่ได้เชื่อมต่อ Google Drive</p>
       <button id="driveConnectBtn" class="btn-secondary">🔗 เชื่อมต่อ Google Drive</button>
@@ -118,6 +122,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="xlsx.full.min.js"></script>
 <script src="seed_meters.js"></script>
+<script src="sync.js"></script>
 <script src="app.js"></script>
 <script src="drive.js"></script>
 </body>

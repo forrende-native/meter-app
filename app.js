@@ -241,6 +241,10 @@ document.getElementById('saveReadingBtn').addEventListener('click', () => {
     createdAt: new Date().toISOString(),
   });
   saveDB(db);
+  const savedReading = db.readings[db.readings.length - 1];
+  if (typeof queueReadingForSync === 'function') {
+    queueReadingForSync(savedReading, meter);
+  }
   document.getElementById('currentReading').value = '';
   document.getElementById('readingNote').value = '';
   updatePrevInfo();
