@@ -42,6 +42,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ===== Meters =====
+function isDuplicateMeter(building, name, type) {
+  const b = (building || '').trim();
+  const n = (name || '').trim();
+  return db.meters.some(m => (m.building || '').trim() === b && (m.name || '').trim() === n && m.type === type);
+}
+
 function addMeter(name, type, rate, building) {
   const m = { id: uid(), name, type, rate: parseFloat(rate) || 0, building: building || '', createdAt: new Date().toISOString() };
   db.meters.push(m);
@@ -115,47 +121,13 @@ function renderMeterList() {
         <div>${m.building ? escapeHtml(m.building) + ' — ' : ''}${escapeHtml(m.name)} — ${m.type === 'water' ? 'น้ำ' : 'ไฟ'}</div>
         <div class="meta">อัตรา ${m.rate} บาท/หน่วย · ${count} รายการจด</div>
       </div>
-      <button class="del-btn" data-id="${m.id}">✕</button>
     `;
     wrap.appendChild(div);
-  });
-  wrap.querySelectorAll('.del-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      if (!confirm('ลบมิเตอร์นี้? ประวัติการจดของมิเตอร์นี้จะถูกลบด้วย')) return;
-      const id = b.dataset.id;
-      db.meters = db.meters.filter(m => m.id !== id);
-      db.readings = db.readings.filter(r => r.meterId !== id);
-      saveDB(db);
-      renderMeterList();
-      populateMeterSelect();
-      toast('ลบแล้ว');
-    });
   });
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-const importBtn = document.getElementById('importSeedBtn');
-const importCard = document.getElementById('importCard');
-if (!window.SEED_METERS || !window.SEED_METERS.length) {
-  if (importCard) importCard.style.display = 'none';
-} else if (importBtn) {
-  importBtn.addEventListener('click', () => {
-    const existingKeys = new Set(db.meters.map(m => `${m.building}|${m.name}|${m.type}`));
-    const toAdd = window.SEED_METERS.filter(s => !existingKeys.has(`${s.building}|${s.name}|${s.type}`));
-    if (toAdd.length === 0) {
-      toast('นำเข้าไปหมดแล้ว (ไม่มีรายการใหม่)');
-      return;
-    }
-    if (!confirm(`นำเข้า ${toAdd.length} มิเตอร์ใหม่ (ทั้งหมด ${window.SEED_METERS.length} รายการ, มีอยู่แล้ว ${window.SEED_METERS.length - toAdd.length})?`)) return;
-    toAdd.forEach(s => addMeter(s.name, s.type, s.rate, s.building));
-    renderMeterList();
-    populateBuildingSelect();
-    populateMeterSelect();
-    toast(`นำเข้าแล้ว ${toAdd.length} มิเตอร์`);
-  });
 }
 
 document.getElementById('addMeterBtn').addEventListener('click', () => {
@@ -164,6 +136,11 @@ document.getElementById('addMeterBtn').addEventListener('click', () => {
   const rate = document.getElementById('meterRate').value;
   const building = document.getElementById('meterBuilding').value.trim();
   if (!name) { toast('กรุณากรอกชื่อห้อง/จุดวัด'); return; }
+  if (isDuplicateMeter(building, name, type)) {
+    const typeLabel = type === 'water' ? 'น้ำ' : 'ไฟ';
+    toast(`${name} (${typeLabel}) มีอยู่ในระบบแล้ว ไม่สามารถเพิ่มซ้ำได้`);
+    return;
+  }
   addMeter(name, type, rate, building);
   document.getElementById('meterName').value = '';
   document.getElementById('meterBuilding').value = '';
@@ -199,13 +176,11 @@ function updateCalcPreview() {
   const curVal = parseFloat(document.getElementById('currentReading').value);
   const box = document.getElementById('calcPreview');
   if (!meterId || isNaN(curVal)) { box.style.display = 'none'; return; }
-  const meter = db.meters.find(m => m.id === meterId);
   const last = getLastReading(meterId);
   const prevVal = last ? last.value : 0;
   const consumed = curVal - prevVal;
-  const cost = consumed * (meter ? meter.rate : 0);
   box.style.display = 'block';
-  box.innerHTML = `หน่วยที่ใช้: <b>${consumed.toFixed(2)}</b> หน่วย &nbsp;|&nbsp; ค่าใช้จ่าย: <b>${cost.toFixed(2)} บาท</b>`;
+  box.innerHTML = `หน่วยที่ใช้: <b>${consumed.toFixed(2)}</b> หน่วย`;
 }
 
 document.getElementById('meterSelect').addEventListener('change', updatePrevInfo);
@@ -273,7 +248,7 @@ function renderHistory() {
     div.innerHTML = `
       <div>
         <div>${escapeHtml(label)} — ${r.value}</div>
-        <div class="meta">${r.date} · ใช้ ${r.consumed.toFixed(2)} หน่วย · ${r.cost.toFixed(2)} บาท${r.note ? ' · ' + escapeHtml(r.note) : ''}</div>
+        <div class="meta">${r.date} · ใช้ ${r.consumed.toFixed(2)} หน่วย${r.note ? ' · ' + escapeHtml(r.note) : ''}</div>
       </div>
       <button class="del-btn" data-id="${r.id}">✕</button>
     `;
@@ -446,8 +421,11 @@ if ('serviceWorker' in navigator) {
 
 // ===== Auto-import on first run (ถ้ายังไม่มีมิเตอร์เลย) =====
 if (db.meters.length === 0 && window.SEED_METERS && window.SEED_METERS.length) {
-  window.SEED_METERS.forEach(s => addMeter(s.name, s.type, s.rate, s.building));
-  setTimeout(() => toast(`นำเข้าอัตโนมัติ ${window.SEED_METERS.length} มิเตอร์จากฐานข้อมูลหอพัก`), 300);
+  const toImport = window.SEED_METERS.filter(s => !isDuplicateMeter(s.building, s.name, s.type));
+  toImport.forEach(s => addMeter(s.name, s.type, s.rate, s.building));
+  if (toImport.length > 0) {
+    setTimeout(() => toast(`นำเข้าอัตโนมัติ ${toImport.length} มิเตอร์จากฐานข้อมูลหอพัก`), 300);
+  }
 }
 
 // ===== Init =====
