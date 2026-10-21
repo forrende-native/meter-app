@@ -94,3 +94,12 @@ function doGet(e) {
     .createTextOutput(JSON.stringify({ ok: true, message: 'rMeter sync endpoint is live' }))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+// Utility: ลบแถวทดสอบทั้งหมด (เรียกตอน setup เท่านั้น ไม่ได้ใช้จริงตอนรัน)
+function clearTestRows() {
+  var sheet = getSheet_();
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+  }
+}
