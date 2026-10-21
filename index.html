@@ -93,7 +93,9 @@
   <section id="tab-export" class="tab-content">
     <div class="card">
       <h2>Export ข้อมูล</h2>
-      <p class="hint">ส่งออกข้อมูลทั้งหมด (ทุกมิเตอร์/ห้อง) เป็นไฟล์ ใช้งานได้แม้ออฟไลน์</p>
+      <label>เลือกเดือนที่ต้องการ (ไม่เลือก = export ทั้งหมด)</label>
+      <select id="exportMonthSelect"><option value="">-- ทุกเดือน --</option></select>
+      <p class="hint">ส่งออกข้อมูลตามเดือนที่เลือก เป็นไฟล์ ใช้งานได้แม้ออฟไลน์</p>
       <button id="exportExcelBtn" class="btn-primary">⬇ Export Excel (.xlsx)</button>
       <button id="exportCsvBtn" class="btn-secondary">⬇ Export CSV</button>
       <hr>

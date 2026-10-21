@@ -37,6 +37,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.dataset.tab === 'history') renderHistory();
     if (btn.dataset.tab === 'meters') renderMeterList();
     if (btn.dataset.tab === 'readings') { populateBuildingSelect(); populateMeterSelect(); updatePrevInfo(); }
+    if (btn.dataset.tab === 'export') populateExportMonthSelect();
   });
 });
 
@@ -290,8 +291,32 @@ function renderHistory() {
 }
 
 // ===== Export =====
+function populateExportMonthSelect() {
+  const sel = document.getElementById('exportMonthSelect');
+  if (!sel) return;
+  const prevVal = sel.value;
+  const months = Array.from(new Set(db.readings.map(r => r.date.slice(0, 7)))).sort().reverse();
+  sel.innerHTML = '<option value="">-- ทุกเดือน --</option>';
+  const thMonths = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  months.forEach(m => {
+    const parts = m.split('-');
+    const y = parts[0];
+    const mo = parts[1];
+    const label = thMonths[parseInt(mo, 10)] + ' ' + (parseInt(y, 10) + 543) + ' (' + m + ')';
+    sel.appendChild(new Option(label, m));
+  });
+  if (prevVal && months.includes(prevVal)) sel.value = prevVal;
+}
+
 function buildExportRows() {
-  const rows = [...db.readings].sort((a, b) => a.date.localeCompare(b.date)).map(r => {
+  const monthSel = document.getElementById('exportMonthSelect');
+  const selectedMonth = monthSel ? monthSel.value : '';
+  let readings = [...db.readings];
+  if (selectedMonth) {
+    readings = readings.filter(r => r.date.slice(0, 7) === selectedMonth);
+  }
+  const rows = readings.sort((a, b) => a.date.localeCompare(b.date)).map(r => {
     const meter = db.meters.find(m => m.id === r.meterId);
     return {
       'ตึก': meter ? (meter.building || '') : '',
@@ -309,27 +334,34 @@ function buildExportRows() {
   return rows;
 }
 
+function exportFilenameSuffix() {
+  const monthSel = document.getElementById('exportMonthSelect');
+  const selectedMonth = monthSel ? monthSel.value : '';
+  return selectedMonth || new Date().toISOString().slice(0, 10);
+}
+
 document.getElementById('exportExcelBtn').addEventListener('click', () => {
   const rows = buildExportRows();
-  if (rows.length === 0) { toast('ยังไม่มีข้อมูลให้ export'); return; }
+  if (rows.length === 0) { toast('ไม่มีข้อมูลในเดือนที่เลือก'); return; }
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{wch:14},{wch:16},{wch:8},{wch:12},{wch:14},{wch:14},{wch:12},{wch:16},{wch:14},{wch:20}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'ข้อมูลมิเตอร์');
-  const fname = `meter-readings-${new Date().toISOString().slice(0,10)}.xlsx`;
+  const fname = 'meter-readings-' + exportFilenameSuffix() + '.xlsx';
   XLSX.writeFile(wb, fname);
   toast('Export Excel แล้ว');
 });
 
 document.getElementById('exportCsvBtn').addEventListener('click', () => {
   const rows = buildExportRows();
-  if (rows.length === 0) { toast('ยังไม่มีข้อมูลให้ export'); return; }
+  if (rows.length === 0) { toast('ไม่มีข้อมูลในเดือนที่เลือก'); return; }
   const headers = Object.keys(rows[0]);
   const csvLines = [headers.join(',')];
   rows.forEach(r => {
     csvLines.push(headers.map(h => {
-      const v = String(r[h] ?? '');
-      return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      const v = String(r[h] != null ? r[h] : '');
+      const needsQuote = v.indexOf('"') !== -1 || v.indexOf(',') !== -1 || v.indexOf('\n') !== -1;
+      return needsQuote ? '"' + v.split('"').join('""') + '"' : v;
     }).join(','));
   });
   const csv = '\uFEFF' + csvLines.join('\r\n'); // BOM for Thai in Excel
@@ -337,7 +369,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `meter-readings-${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = 'meter-readings-' + exportFilenameSuffix() + '.csv';
   a.click();
   URL.revokeObjectURL(url);
   toast('Export CSV แล้ว');
@@ -421,6 +453,7 @@ if (db.meters.length === 0 && window.SEED_METERS && window.SEED_METERS.length) {
 // ===== Init =====
 populateBuildingSelect();
 populateMeterSelect();
+populateExportMonthSelect();
 updatePrevInfo();
 renderMeterList();
 renderHistory();
