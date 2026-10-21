@@ -89,10 +89,52 @@ function doPost(e) {
 }
 
 // ใช้ทดสอบว่า Web App ทำงานอยู่ (เปิด URL ตรงๆ ใน browser จะเจอ endpoint นี้)
+// รองรับ ?action=export เพื่อดึงข้อมูลทั้งหมดกลับเป็น JSON (ใช้โดยระบบภายนอก เช่น dorm)
 function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'export') {
+    return exportReadingsAsJson_();
+  }
   return ContentService
     .createTextOutput(JSON.stringify({ ok: true, message: 'rMeter sync endpoint is live' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function exportReadingsAsJson_() {
+  var sheet = getSheet_();
+  var lastRow = sheet.getLastRow();
+  var result = { ok: true, readings: [] };
+  if (lastRow > 1) {
+    var values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+    values.forEach(function (row) {
+      if (!row[1] && !row[2]) return; // แถวว่าง ข้าม
+      result.readings.push({
+        recordedAt: row[0] ? new Date(row[0]).toISOString() : '',
+        building: row[1] || '',
+        meterName: row[2] || '',
+        type: row[3] === 'น้ำ' ? 'water' : 'electric',
+        date: normalizeDate_(row[4]),
+        prevValue: row[5],
+        value: row[6],
+        consumed: row[7],
+        rate: row[8],
+        cost: row[9],
+        note: row[10] || '',
+        readingId: row[11] || '',
+      });
+    });
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function normalizeDate_(val) {
+  if (!val) return '';
+  if (Object.prototype.toString.call(val) === '[object Date]') {
+    // ใช้ timezone ของสคริปต์ (ตั้งไว้ Asia/Bangkok) กัน off-by-one จาก UTC conversion
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return String(val);
 }
 
 // Utility: ลบแถวทดสอบทั้งหมด (เรียกตอน setup เท่านั้น ไม่ได้ใช้จริงตอนรัน)

@@ -1,19 +1,33 @@
 // ===== Storage =====
 const DB_KEY = 'meterapp_db_v1';
 
+// อัตรา/ขั้นต่ำกลาง — ต้องตรงกับระบบ dorm (D:\...\dorm, db.config ใน app.js ของ dorm) เสมอ
+// ถ้าแก้เรทที่ dorm ต้องมาแก้ตรงนี้ด้วยมือให้ตรงกัน (ไม่ได้ sync กันอัตโนมัติ)
+const DEFAULT_CONFIG = { waterRate: 19, electricRate: 9, waterMinimum: 95, electricMinimum: 180 };
+
 function loadDB() {
   try {
     const raw = localStorage.getItem(DB_KEY);
-    if (!raw) return { meters: [], readings: [] };
-    return JSON.parse(raw);
+    const parsed = raw ? JSON.parse(raw) : { meters: [], readings: [] };
+    if (!parsed.config) parsed.config = { ...DEFAULT_CONFIG };
+    if (!parsed.meters) parsed.meters = [];
+    if (!parsed.readings) parsed.readings = [];
+    return parsed;
   } catch (e) {
-    return { meters: [], readings: [] };
+    return { meters: [], readings: [], config: { ...DEFAULT_CONFIG } };
   }
 }
 function saveDB(db) {
   localStorage.setItem(DB_KEY, JSON.stringify(db));
 }
 let db = loadDB();
+
+// คำนวณค่าใช้จ่ายพร้อมขั้นต่ำ (เหมือนสูตรที่ dorm ใช้: Math.max(ขั้นต่ำ, หน่วย*เรท))
+function calcCost(type, consumed, rate) {
+  const raw = consumed * rate;
+  const minimum = type === 'water' ? db.config.waterMinimum : db.config.electricMinimum;
+  return Math.max(minimum, raw);
+}
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -116,10 +130,11 @@ function renderMeterList() {
     const count = db.readings.filter(r => r.meterId === m.id).length;
     const div = document.createElement('div');
     div.className = 'list-item';
+    const displayRate = m.type === 'water' ? db.config.waterRate : db.config.electricRate;
     div.innerHTML = `
       <div>
         <div>${m.building ? escapeHtml(m.building) + ' — ' : ''}${escapeHtml(m.name)} — ${m.type === 'water' ? 'น้ำ' : 'ไฟ'}</div>
-        <div class="meta">อัตรา ${m.rate} บาท/หน่วย · ${count} รายการจด</div>
+        <div class="meta">อัตรา ${displayRate} บาท/หน่วย · ${count} รายการจด</div>
       </div>
     `;
     wrap.appendChild(div);
@@ -202,7 +217,8 @@ document.getElementById('saveReadingBtn').addEventListener('click', () => {
   const last = getLastReading(meterId);
   const prevVal = last ? last.value : 0;
   const consumed = value - prevVal;
-  const cost = consumed * (meter ? meter.rate : 0);
+  const rate = meter ? (meter.type === 'water' ? db.config.waterRate : db.config.electricRate) : 0;
+  const cost = meter ? calcCost(meter.type, consumed, rate) : 0;
 
   db.readings.push({
     id: uid(),
@@ -211,7 +227,7 @@ document.getElementById('saveReadingBtn').addEventListener('click', () => {
     value,
     prevValue: prevVal,
     consumed,
-    rate: meter ? meter.rate : 0,
+    rate,
     cost,
     note,
     createdAt: new Date().toISOString(),

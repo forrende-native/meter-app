@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "ซิงก์ค่ามิเตอร์: แอปมือถือ -> Google Sheet -> ระบบ Dorm",
+    "subtitle": "จดในมือถือได้ออฟไลน์ สำเนาขึ้น Sheet อัตโนมัติ แล้ว Dorm ดึงมาเติมเอง",
+    "output": "examples/meter-sheet-dorm-sync.html",
+    "quality_profile": "showcase",
+    "viewBox": [1200, 600]
+  },
+  "lanes": [
+    { "id": "mobile", "label": "แอปจดมิเตอร์ (มือถือ)" },
+    { "id": "sheet", "label": "Google Sheet" },
+    { "id": "dorm", "label": "ระบบ Dorm" },
+    { "id": "exceptions", "label": "กรณีข้าม/รอ", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "capture", "label": "จดและส่งคิว", "fromCol": 0, "toCol": 1 },
+    { "id": "bridge", "label": "สำเนาผ่าน Sheet", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "ingest", "label": "นำเข้าเข้า Dorm", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["record", "queue", "syncpush", "export", "match", "dedupe", "insert"],
+  "nodes": [
+    { "id": "record", "lane": "mobile", "col": 0, "width": 88, "type": "frontend", "label": "จดค่ามิเตอร์", "sublabel": "เลือกตึก/ห้อง" },
+    { "id": "queue", "lane": "mobile", "col": 1, "width": 80, "type": "database", "label": "คิว Outbox", "sublabel": "localStorage" },
+    { "id": "syncpush", "lane": "sheet", "col": 2, "width": 100, "type": "messagebus", "label": "Readings Sheet", "sublabel": "กันซ้ำด้วย ID" },
+    { "id": "export", "lane": "sheet", "col": 3, "width": 88, "type": "backend", "label": "Apps Script", "sublabel": "export JSON" },
+    { "id": "match", "lane": "dorm", "col": 4, "width": 88, "type": "backend", "label": "จับคู่น้ำ+ไฟ", "sublabel": "ตึก+ห้อง+วันที่" },
+    { "id": "dedupe", "lane": "dorm", "col": 5, "width": 80, "type": "security", "label": "เช็คซ้ำ", "sublabel": "เดือนนี้มีไหม" },
+    { "id": "insert", "lane": "exceptions", "col": 5, "width": 80, "type": "database", "label": "เพิ่มมิเตอร์", "sublabel": "ตาราง meters" },
+    { "id": "waitpair", "lane": "exceptions", "col": 4, "width": 88, "type": "cloud", "label": "รอครบคู่", "sublabel": "ยังขาดน้ำ/ไฟ" },
+    { "id": "noroom", "lane": "mobile", "col": 5, "width": 88, "type": "cloud", "label": "ไม่พบห้อง", "sublabel": "ชื่อไม่ตรง" }
+  ],
+  "edges": [
+    { "from": "record", "to": "queue" },
+    { "from": "queue", "to": "syncpush", "label": "มีเน็ต" },
+    { "from": "syncpush", "to": "export" },
+    { "from": "export", "to": "match", "label": "GET JSON" },
+    { "from": "match", "to": "dedupe", "label": "ครบคู่" },
+    { "from": "match", "to": "waitpair", "variant": "dashed", "role": "branch" },
+    { "from": "dedupe", "to": "insert" },
+    { "from": "dedupe", "to": "noroom", "variant": "dashed", "role": "branch" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "ออฟไลน์ก่อนเสมอ", "items": ["จดมิเตอร์ได้แม้ไม่มีเน็ต ข้อมูลหลักอยู่ใน localStorage", "คิว outbox ส่งซ้ำอัตโนมัติเมื่อกลับมามีเน็ต ไม่หลุดหาย"] },
+    { "dot": "cyan", "title": "Sheet เป็นสะพาน ไม่ใช่ตัวระบบ", "items": ["Apps Script endpoint เดียว รองรับทั้งบันทึกและส่งออก", "CORS เปิดกว้าง ทำให้ Dorm ดึงตรงจาก browser ได้เลย"] },
+    { "dot": "amber", "title": "นำเข้าแบบกดเอง + ปลอดภัย", "items": ["ต้องครบทั้งน้ำและไฟของห้อง/วันเดียวกันก่อนจึงนำเข้า", "ข้ามรายการที่ห้องนั้นมีมิเตอร์เดือนนั้นอยู่แล้วเสมอ"] }
+  ]
+}
