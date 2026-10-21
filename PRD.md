@@ -1,5 +1,11 @@
 # PRD: จดมิเตอร์ (Meter Reading PWA)
 
+> **Diagram การทำงานแบบง่าย (สำหรับอธิบายให้คนทั่วไปเข้าใจ)**: เปิดไฟล์
+> [`diagrams/simple-meter-dorm.html`](diagrams/simple-meter-dorm.html) ดูภาพรวม 3 ขั้นตอน
+> "จดมือถือ → เก็บที่ PMNmeter (Google Sheet) → ระบบ Dorm กดปุ่มดึงไปใช้"
+> ดูรายละเอียดลึกกว่านั้น (รวม flow กรณีข้าม/รอข้อมูลไม่ครบ) ได้ที่
+> [`diagrams/meter-sheet-dorm-sync.html`](diagrams/meter-sheet-dorm-sync.html)
+
 ## 1. ปัญหา / ที่มา
 
 เจ้าของหอพัก/คอนโดให้เช่าหลายตึก (เพิ่มทรัพย์, ปานมณี, บ้านเช่า — รวม 121 ห้อง) ต้องจดค่ามิเตอร์น้ำ-ไฟ
@@ -99,7 +105,7 @@
 - **Offline**: Service Worker (`sw.js`) cache ไฟล์ static ทั้งหมด (HTML/CSS/JS/ไอคอน/ไลบรารี) — cache-first with network fallback
 - **Export**: ไลบรารี SheetJS (`xlsx.full.min.js`, ฝังไฟล์ไว้ในเครื่อง ไม่โหลดจาก CDN ตอนรันจริง) แปลง array ข้อมูลเป็น .xlsx ฝั่ง client, กรองตามเดือนก่อนสร้างไฟล์; CSV สร้างเองด้วย string ธรรมดา
 - **Google Drive backup**: Google Identity Services (GIS) token client (OAuth 2.0 implicit flow ฝั่ง browser) ขอ access token แบบ scope `drive.file` แล้วอัปโหลดไฟล์ผ่าน Drive API v3 multipart upload ตรงจาก browser ไม่ผ่าน backend ใดๆ
-- **Google Sheet sync**: Google Apps Script deploy เป็น Web App (`AKfycby...exec`, access: ANYONE_ANONYMOUS, execute as: USER_DEPLOYING) ไม่ต้องใช้ OAuth ฝั่งผู้ใช้เลย — แอป `sync.js` POST JSON array ของ reading ไปที่ endpoint นี้ (ผ่าน outbox queue + retry loop), Apps Script เขียนแถวใหม่ลงชีต "Readings" กันซ้ำด้วย `readingId`. Endpoint เดียวกันรองรับ `GET ?action=export` คืนข้อมูลทั้งหมดเป็น JSON (มี `Access-Control-Allow-Origin: *` ให้เรียกข้าม origin ได้ทันที) สำหรับให้ระบบภายนอก (เช่น dorm) ดึงไปใช้
+- **Google Sheet sync**: Google Apps Script deploy เป็น Web App (`AKfycby...exec`, access: ANYONE_ANONYMOUS, execute as: USER_DEPLOYING) ไม่ต้องใช้ OAuth ฝั่งผู้ใช้เลย — แอป `sync.js` POST JSON array ของ reading ไปที่ endpoint นี้ (ผ่าน outbox queue + retry loop), Apps Script เขียนแถวใหม่ลงชีต "Readings" ในไฟล์ Google Sheet ชื่อ **"PMNmeter - Readings Sync"** (เก็บในโฟลเดอร์ Drive ชื่อ **"PMNmeter"**) กันซ้ำด้วย `readingId`. Endpoint เดียวกันรองรับ `GET ?action=export` คืนข้อมูลทั้งหมดเป็น JSON (มี `Access-Control-Allow-Origin: *` ให้เรียกข้าม origin ได้ทันที) สำหรับให้ระบบภายนอก (เช่น dorm) ดึงไปใช้
 - **Hosting**: GitHub Pages serve static files ตรงจาก branch `master` ของ repo `forrende-native/meter-app`
 - **Seed data pipeline**: สคริปต์ Python (`export_meters_import.py`) อ่านตรงจาก SQLite ของระบบจัดการหอพักที่มีอยู่แล้ว (`dormflow.sqlite`) → generate เป็น `seed_meters.js` (ไฟล์ static ฝังในแอป ไม่ query DB แบบ live)
 - **จุดเชื่อมกับระบบ dorm**: dorm เป็นคนละโปรเจกต์ (Node/Express + SQLite + client-side JS, รันที่ `localhost:3000`, โฟลเดอร์ `D:\OneDrive - Rende Development Co., Ltd\0.b\dorm`) ไม่ได้ merge โค้ดกัน — เชื่อมกันผ่าน Google Sheet เป็นสะพานเท่านั้น (loosely coupled):
@@ -123,6 +129,7 @@
 | การจับคู่ชื่อห้อง/ตึกระหว่าง meter-app กับ dorm ใช้การเทียบ string ตรงเป๊ะ | ถ้าพิมพ์ชื่อตึก/เลขห้องไม่ตรงกันเป๊ะ (เช่น เว้นวรรคต่าง, สะกดต่าง) จะ import ไม่เจอห้องนั้นเงียบๆ (ไปโผล่ในสรุป "หาห้องไม่เจอ") | ตรวจสรุปผลทุกครั้งหลังนำเข้า, ตั้งชื่อตึก/ห้องให้ตรงกันตั้งแต่ตอน seed |
 | การนำเข้าเข้า dorm เป็น one-shot ต่อครั้งกด ไม่ sync ต่อเนื่อง | ถ้าจดมิเตอร์เพิ่มหลังนำเข้าไปแล้ว ต้องกดนำเข้าซ้ำเองเพื่อดึงรายการใหม่ | เป็นการตัดสินใจเชิงออกแบบ (manual control) ไม่ใช่บั๊ก — ผู้ใช้ต้องกดปุ่มเองทุกครั้งที่ต้องการ sync |
 | Apps Script endpoint เปิด public (ANYONE_ANONYMOUS) เพื่อให้เรียกข้าม origin ได้ง่าย | ใครก็ตามที่รู้ URL สามารถ POST ข้อมูลปลอมเข้า Sheet ได้ (ไม่มี auth) | ยอมรับความเสี่ยงนี้เพราะ URL ไม่เปิดเผยสาธารณะ และข้อมูลที่เสี่ยงคือ Sheet ส่วนตัว ไม่ใช่ระบบคิดเงินโดยตรง — ถ้าต้องการเข้มงวดขึ้นในอนาคตควรเพิ่ม shared-secret token ในคำขอ |
+| **เรทค่าน้ำ/ไฟ + ขั้นต่ำใน meter-app (`DEFAULT_CONFIG` ใน `app.js`) ไม่ sync กับ dorm (`db.config`) อัตโนมัติ** | ถ้าแก้เรทที่ dorm แล้วลืมแก้ที่ meter-app (หรือกลับกัน) ตัวเลขค่าใช้จ่ายที่คำนวณเบื้องหลัง (สำหรับ export/ส่งขึ้น Sheet) จะไม่ตรงกับที่ dorm ใช้คิดบิลจริง | ต้องแก้มือทั้ง 2 ที่ให้ตรงกันทุกครั้งที่เปลี่ยนเรท (ปัจจุบัน: น้ำ 19 บาท/หน่วย ขั้นต่ำ 95 บาท, ไฟ 9 บาท/หน่วย ขั้นต่ำ 180 บาท) — ไม่มีการเตือนอัตโนมัติถ้าค่าไม่ตรงกัน |
 
 ## 9. งานในอนาคต (ไม่รีบ แต่บันทึกไว้)
 

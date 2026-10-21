@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "จดมิเตอร์มือถือ ไปโผล่ในระบบ Dorm ได้ยังไง",
+    "subtitle": "3 ขั้นตอนง่ายๆ: จด -> เก็บที่กลาง -> ระบบหอพักดึงไปใช้",
+    "output": "examples/simple-meter-dorm.html",
+    "quality_profile": "showcase",
+    "viewBox": [1150, 500]
+  },
+  "lanes": [
+    { "id": "you", "label": "คุณ (คนจดมิเตอร์)" },
+    { "id": "middle", "label": "ที่พักข้อมูลกลาง (PMNmeter)" },
+    { "id": "dorm", "label": "ระบบ Dorm (คิดบิล/ดูรายงาน)" }
+  ],
+  "mainPath": ["app", "sheet", "button", "bill"],
+  "nodes": [
+    { "id": "app", "lane": "you", "col": 0, "width": 84, "type": "frontend", "label": "เปิดแอปมือถือ", "sublabel": "จดเลขมิเตอร์" },
+    { "id": "sheet", "lane": "middle", "col": 2, "width": 84, "type": "database", "label": "PMNmeter", "sublabel": "เก็บทุกเลขที่จด" },
+    { "id": "button", "lane": "dorm", "col": 3, "width": 104, "type": "backend", "label": "กดปุ่มดึงข้อมูล", "sublabel": "หน้าตั้งค่า" },
+    { "id": "bill", "lane": "dorm", "col": 5, "width": 90, "type": "external", "label": "ขึ้นบิล/รายงาน", "sublabel": "ห้องนั้นทันที" }
+  ],
+  "edges": [
+    { "from": "app", "to": "sheet", "label": "ส่งอัตโนมัติ" },
+    { "from": "sheet", "to": "button", "label": "มีข้อมูลรออยู่" },
+    { "from": "button", "to": "bill" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "จดตอนไม่มีเน็ตก็ได้", "items": ["แอปมือถือจดได้แม้ไม่มีสัญญาณ", "พอมีเน็ตจะส่งเข้า PMNmeter ให้เองอัตโนมัติ"] },
+    { "dot": "cyan", "title": "ไม่ต้องพิมพ์ซ้ำ 2 รอบ", "items": ["จดในมือถือรอบเดียวพอ", "ระบบ Dorm กดปุ่มเดียวดึงมาใช้ได้เลย ไม่ต้องพิมพ์เลขมิเตอร์ซ้ำ"] },
+    { "dot": "amber", "title": "กันข้อมูลซ้ำ/ผิดพลาด", "items": ["ถ้าห้องนั้นมีข้อมูลเดือนนั้นอยู่แล้ว จะข้ามไปเอง ไม่ทับของเก่า", "ถ้ายังจดไม่ครบทั้งน้ำและไฟ จะรอไว้ก่อน ไม่เอาข้อมูลครึ่งเดียวไปคิดบิล"] }
+  ]
+}
