@@ -1,7 +1,7 @@
 // ===== Google Sheet sync (outbox queue, works offline, retries when online) =====
 // ตั้งค่า URL ของ Apps Script Web App ที่ deploy แล้ว (ลงท้ายด้วย /exec)
 // ปล่อยว่างไว้ = ปิดการ sync (แอปยังใช้งานออฟไลน์ได้ปกติ)
-const SHEET_WEBAPP_URL = ''; // <-- ใส่ URL จาก Apps Script deployment ตรงนี้
+const SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyCBp1Si7VkhekLIH2t1PAe4UpXelHzs3YTgyUdE555slItPnVg4igMiI-rckWd4H9_/exec';
 
 const SYNC_QUEUE_KEY = 'meterapp_sync_queue_v1';
 
