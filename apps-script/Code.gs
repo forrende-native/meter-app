@@ -145,3 +145,43 @@ function clearTestRows() {
     sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
   }
 }
+
+// ขั้นต่ำค่าใช้จ่าย (บาท) — ต้องตรงกับ DEFAULT_CONFIG ในแอป meter-app (app.js)
+// และ db.config ของระบบ dorm เสมอ ถ้าแก้เรทที่ใดที่หนึ่งต้องมาคำนวณขั้นต่ำใหม่แล้วแก้ที่นี่ด้วยมือ
+var WATER_MINIMUM_BAHT = 95;
+var ELECTRIC_MINIMUM_BAHT = 180;
+
+// เมื่อมีคนแก้ "เลขครั้งก่อน" หรือ "เลขครั้งนี้" ในชีตด้วยมือ
+// คำนวณ "หน่วยที่ใช้" และ "ค่าใช้จ่าย" ของแถวนั้นใหม่อัตโนมัติ (สูตรเดียวกับที่ dorm ใช้คิดบิลจริง)
+// หมายเหตุ: ไม่ auto-recalc คอลัมน์ "อัตรา" — ถ้าต้องการเปลี่ยนอัตรา ให้แก้คอลัมน์อัตราเองแล้วแก้เลขครั้งก่อน/นี้ซ้ำอีกครั้ง (หรือพิมพ์ค่าเดิมซ้ำ) เพื่อให้ trigger คำนวณใหม่
+function onEdit(e) {
+  try {
+    var sheet = e.range.getSheet();
+    if (sheet.getName() !== SHEET_NAME) return;
+    var row = e.range.getRow();
+    if (row === 1) return; // หัวตาราง ไม่ต้องคำนวณ
+
+    var col = e.range.getColumn();
+    // คอลัมน์ 6 = เลขครั้งก่อน, 7 = เลขครั้งนี้ — recalc เฉพาะตอนแก้ 2 คอลัมน์นี้
+    if (col !== 6 && col !== 7) return;
+
+    var rowRange = sheet.getRange(row, 1, 1, sheet.getLastColumn());
+    var values = rowRange.getValues()[0];
+    var typeLabel = values[3];  // ประเภท: น้ำ/ไฟ
+    var prevValue = Number(values[5]);
+    var value = Number(values[6]);
+    var rate = Number(values[8]);
+
+    if (isNaN(prevValue) || isNaN(value) || isNaN(rate)) return; // ข้อมูลไม่ครบ ข้าม
+
+    var consumed = value - prevValue;
+    var minimum = typeLabel === 'น้ำ' ? WATER_MINIMUM_BAHT : ELECTRIC_MINIMUM_BAHT;
+    var cost = Math.max(minimum, consumed * rate);
+
+    sheet.getRange(row, 8).setValue(consumed); // หน่วยที่ใช้
+    sheet.getRange(row, 10).setValue(cost);    // ค่าใช้จ่าย
+  } catch (err) {
+    // ไม่ throw ต่อ เพื่อไม่ให้ onEdit พังการแก้ไขของผู้ใช้ปกติ
+    Logger.log('onEdit error: ' + err);
+  }
+}
