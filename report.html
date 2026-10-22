@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รายละเอียดรายห้อง — มิเตอร์น้ำ-ไฟ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --card-bg: #ffffff;
+    --border: #e1e4e8;
+    --text: #1a1a1a;
+    --text-muted: #6b7280;
+    --head-bg: #f7f8fa;
+    --row-hover: #f5f7fa;
+    --accent: #1565c0;
+    --focus-ring: #1565c0;
+    --warning: #c62828;
+    --bar: #c7d7ef;
+    --input-bg: #fafafa;
+    --input-border: #ccc;
+    --btn-bg: #eef1f5;
+    --btn-active-bg: #1565c0;
+    --btn-active-text: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181c;
+      --card-bg: #1e2227;
+      --border: #30353c;
+      --text: #e8e9eb;
+      --text-muted: #9aa0a8;
+      --head-bg: #262b31;
+      --row-hover: #262b31;
+      --accent: #5b9bf0;
+      --focus-ring: #5b9bf0;
+      --warning: #ef6b6b;
+      --bar: #2e3c57;
+      --input-bg: #262b31;
+      --input-border: #3a4149;
+      --btn-bg: #262b31;
+      --btn-active-bg: #5b9bf0;
+      --btn-active-text: #10141a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background: var(--bg);
+    color: var(--text);
+  }
+  body {
+    font-family: "IBM Plex Sans Thai", "Noto Sans Thai", -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 20px 14px 40px;
+  }
+  .card {
+    max-width: 920px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .back-link:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .eyebrow {
+    margin: 0 0 4px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  h1 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  #searchInput {
+    flex: 1 1 220px;
+    min-width: 160px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text);
+  }
+  #searchInput:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+  .building-filter {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .filter-btn.active {
+    background: var(--btn-active-bg);
+    color: var(--btn-active-text);
+    border-color: var(--btn-active-bg);
+  }
+  .filter-btn:focus-visible,
+  .filter-btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .status {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    min-height: 18px;
+  }
+  .status.error { color: var(--warning); }
+  .table-wrap {
+    max-height: 30rem;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+    font-size: 14px;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--head-bg);
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
+  }
+  thead th .arrow {
+    display: inline-block;
+    width: 1em;
+    opacity: 0.6;
+    font-size: 11px;
+  }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr:hover { background: var(--row-hover); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  td.warning { color: var(--warning); font-weight: 600; }
+  .total-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .total-bar-track {
+    width: 56px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .total-bar-fill {
+    height: 100%;
+    background: var(--bar);
+    border-radius: 3px;
+  }
+  .empty-row td {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 24px 12px;
+    white-space: normal;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <a href="index.html" class="back-link">&larr; กลับหน้าแรก</a>
+  <p class="eyebrow" id="eyebrow">มิเตอร์น้ำ-ไฟ</p>
+  <h1>รายละเอียดรายห้อง</h1>
+  <div class="controls">
+    <input type="search" id="searchInput" placeholder="ค้นหาห้อง เช่น 305" aria-label="ค้นหาห้อง">
+    <div class="building-filter" role="group" aria-label="กรองตึก">
+      <button type="button" class="filter-btn active" data-building="all">ทั้งหมด</button>
+      <button type="button" class="filter-btn" data-building="เพิ่มทรัพย์">เพิ่มทรัพย์</button>
+      <button type="button" class="filter-btn" data-building="ปานมณี">ปานมณี</button>
+    </div>
+  </div>
+  <div class="status" id="statusMsg">กำลังโหลดข้อมูล...</div>
+  <div class="table-wrap">
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th data-key="building" data-type="text" tabindex="0">ตึก<span class="arrow"></span></th>
+          <th data-key="room" data-type="natural" tabindex="0">ห้อง<span class="arrow"></span></th>
+          <th class="num" data-key="waterUnits" data-type="number" tabindex="0">น้ำ (หน่วย)<span class="arrow"></span></th>
+          <th class="num" data-key="waterCost" data-type="number" tabindex="0">ค่าน้ำ (บาท)<span class="arrow"></span></th>
+          <th class="num" data-key="elecUnits" data-type="number" tabindex="0">ไฟ (หน่วย)<span class="arrow"></span></th>
+          <th class="num" data-key="elecCost" data-type="number" tabindex="0">ค่าไฟ (บาท)<span class="arrow"></span></th>
+          <th class="num" data-key="total" data-type="number" tabindex="0" aria-sort="descending">รวม (บาท)<span class="arrow">▼</span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ===== ตั้งค่า =====
+// URL Apps Script Web App เดียวกับที่ sync.js ใช้ (รองรับ GET ?action=export)
+const SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyCBp1Si7VkhekLIH2t1PAe4UpXelHzs3YTgyUdE555slItPnVg4igMiI-rckWd4H9_/exec';
+
+// หน่วยไฟต่อเดือนที่ถือว่าสูงผิดปกติ — ตัวเลขนี้แก้ได้ง่ายที่เดียว
+const ELECTRIC_WARNING_UNITS = 150;
+
+const THAI_MONTHS = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+const numFmt = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 });
+
+let fullRows = [];       // ข้อมูลหลังรวม pivot ทั้งหมด (ยังไม่กรอง)
+let currentBuilding = 'all';
+let sortKey = 'total';
+let sortDir = 'desc';
+let maxTotal = 0;
+
+function naturalCompare(a, b) {
+  const ax = String(a).match(/\d+|\D+/g) || [];
+  const bx = String(b).match(/\d+|\D+/g) || [];
+  const len = Math.max(ax.length, bx.length);
+  for (let i = 0; i < len; i++) {
+    const av = ax[i] || '';
+    const bv = bx[i] || '';
+    const an = parseInt(av, 10);
+    const bn = parseInt(bv, 10);
+    if (!isNaN(an) && !isNaN(bn)) {
+      if (an !== bn) return an - bn;
+    } else if (av !== bv) {
+      return av.localeCompare(bv, 'th');
+    }
+  }
+  return 0;
+}
+
+function setStatus(msg, isError) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.classList.toggle('error', !!isError);
+}
+
+async function loadData() {
+  try {
+    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export');
+    const data = await resp.json();
+    if (!data || !data.ok || !Array.isArray(data.readings)) {
+      throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+    }
+    buildReport(data.readings);
+  } catch (err) {
+    setStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err && err.message ? err.message : err), true);
+  }
+}
+
+function buildReport(readings) {
+  const valid = readings.filter(r => r.building || r.meterName);
+  if (valid.length === 0) {
+    setStatus('ไม่มีข้อมูลในชีต', true);
+    renderRows([]);
+    return;
+  }
+
+  // หารอบจดล่าสุด (เดือนที่มากที่สุดจากวันที่จดจริง) แล้วใช้เฉพาะรอบนั้น
+  const months = valid.map(r => (r.date || '').slice(0, 7)).filter(Boolean).sort();
+  const latestMonth = months[months.length - 1] || '';
+  const cycleReadings = latestMonth
+    ? valid.filter(r => (r.date || '').slice(0, 7) === latestMonth)
+    : valid;
+
+  // อัปเดตหัวเรื่องเล็กด้านบนตามเดือนจริงจากข้อมูล
+  if (latestMonth) {
+    const parts = latestMonth.split('-');
+    const y = parseInt(parts[0], 10);
+    const mo = parseInt(parts[1], 10);
+    const label = (THAI_MONTHS[mo] || '') + ' ' + (y + 543);
+    document.getElementById('eyebrow').textContent = 'มิเตอร์น้ำ-ไฟ · รอบจด' + label;
+  } else {
+    document.getElementById('eyebrow').textContent = 'มิเตอร์น้ำ-ไฟ';
+  }
+
+  // Pivot: 1 แถวต่อ (ตึก + ห้อง)
+  const map = new Map();
+  cycleReadings.forEach(r => {
+    const key = (r.building || '') + '||' + (r.meterName || '');
+    if (!map.has(key)) {
+      map.set(key, {
+        building: r.building || '',
+        room: r.meterName || '',
+        waterUnits: 0,
+        waterCost: 0,
+        elecUnits: 0,
+        elecCost: 0,
+      });
+    }
+    const row = map.get(key);
+    const units = Number(r.consumed) || 0;
+    const cost = Number(r.cost) || 0;
+    if (r.type === 'water') {
+      row.waterUnits += units;
+      row.waterCost += cost;
+    } else {
+      row.elecUnits += units;
+      row.elecCost += cost;
+    }
+  });
+
+  fullRows = Array.from(map.values()).map(row => ({
+    ...row,
+    total: row.waterCost + row.elecCost,
+  }));
+  maxTotal = fullRows.reduce((m, r) => Math.max(m, r.total), 0);
+
+  setStatus('ข้อมูล ' + fullRows.length + ' ห้อง');
+  applyFiltersAndRender();
+}
+
+function applyFiltersAndRender() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  let rows = fullRows.slice();
+
+  if (currentBuilding !== 'all') {
+    rows = rows.filter(r => r.building === currentBuilding);
+  }
+  if (query) {
+    rows = rows.filter(r => r.room.toLowerCase().includes(query));
+  }
+
+  rows.sort((a, b) => {
+    let cmp;
+    const col = sortKey;
+    if (col === 'room') {
+      cmp = naturalCompare(a.room, b.room);
+    } else if (col === 'building') {
+      cmp = a.building.localeCompare(b.building, 'th');
+    } else {
+      cmp = (a[col] || 0) - (b[col] || 0);
+    }
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  renderRows(rows, query);
+}
+
+function renderRows(rows, hadQuery) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  if (rows.length === 0) {
+    const tr = document.createElement('tr');
+    tr.className = 'empty-row';
+    const td = document.createElement('td');
+    td.colSpan = 7;
+    td.textContent = 'ไม่พบห้องที่ตรงกับคำค้น';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+
+    const tdBuilding = document.createElement('td');
+    tdBuilding.textContent = r.building;
+    tr.appendChild(tdBuilding);
+
+    const tdRoom = document.createElement('td');
+    tdRoom.textContent = r.room;
+    tr.appendChild(tdRoom);
+
+    const tdWaterUnits = document.createElement('td');
+    tdWaterUnits.className = 'num';
+    tdWaterUnits.textContent = numFmt.format(r.waterUnits);
+    tr.appendChild(tdWaterUnits);
+
+    const tdWaterCost = document.createElement('td');
+    tdWaterCost.className = 'num';
+    tdWaterCost.textContent = numFmt.format(r.waterCost);
+    tr.appendChild(tdWaterCost);
+
+    const tdElecUnits = document.createElement('td');
+    tdElecUnits.className = 'num' + (r.elecUnits > ELECTRIC_WARNING_UNITS ? ' warning' : '');
+    tdElecUnits.textContent = numFmt.format(r.elecUnits);
+    tr.appendChild(tdElecUnits);
+
+    const tdElecCost = document.createElement('td');
+    tdElecCost.className = 'num';
+    tdElecCost.textContent = numFmt.format(r.elecCost);
+    tr.appendChild(tdElecCost);
+
+    const tdTotal = document.createElement('td');
+    tdTotal.className = 'num';
+    const pct = maxTotal > 0 ? Math.max(2, Math.round((r.total / maxTotal) * 100)) : 0;
+    tdTotal.innerHTML =
+      '<div class="total-cell">' +
+        '<span class="total-bar-track"><span class="total-bar-fill" style="width:' + pct + '%"></span></span>' +
+        '<span>' + numFmt.format(r.total) + '</span>' +
+      '</div>';
+    tr.appendChild(tdTotal);
+
+    tbody.appendChild(tr);
+  });
+}
+
+function setupSorting() {
+  const ths = document.querySelectorAll('#reportTable thead th');
+  ths.forEach(th => {
+    const activate = () => {
+      const key = th.dataset.key;
+      if (sortKey === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey = key;
+        sortDir = key === 'room' || key === 'building' ? 'asc' : 'desc';
+      }
+      ths.forEach(t => {
+        t.removeAttribute('aria-sort');
+        t.querySelector('.arrow').textContent = '';
+      });
+      th.setAttribute('aria-sort', sortDir === 'asc' ? 'ascending' : 'descending');
+      th.querySelector('.arrow').textContent = sortDir === 'asc' ? '▲' : '▼';
+      applyFiltersAndRender();
+    };
+    th.addEventListener('click', activate);
+    th.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activate();
+      }
+    });
+  });
+}
+
+function setupFilters() {
+  document.getElementById('searchInput').addEventListener('input', applyFiltersAndRender);
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentBuilding = btn.dataset.building;
+      applyFiltersAndRender();
+    });
+  });
+}
+
+setupSorting();
+setupFilters();
+loadData();
+</script>
+</body>
+</html>

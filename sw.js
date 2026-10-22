@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meterapp-v10';
+const CACHE_NAME = 'meterapp-v11';
 const ASSETS = [
   './',
   './index.html',
