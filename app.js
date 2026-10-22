@@ -168,7 +168,25 @@ document.getElementById('addMeterBtn').addEventListener('click', () => {
 // ===== Readings =====
 function getLastReading(meterId) {
   const list = db.readings.filter(r => r.meterId === meterId).sort((a, b) => a.date.localeCompare(b.date));
-  return list.length ? list[list.length - 1] : null;
+  const localLast = list.length ? list[list.length - 1] : null;
+
+  // เทียบกับค่าล่าสุดที่ cache มาจาก Google Sheet (กันกรณีเครื่องนี้ไม่เคยมีประวัติห้องนี้ใน
+  // localStorage เลย เช่น ห้องที่ import baseline เข้า Sheet ตรงๆ ไม่ผ่านแอป — ถ้าไม่เช็คตรงนี้
+  // "เลขครั้งก่อน" จะหลุดเป็น 0 ทั้งที่จริงมีเลขก่อนหน้าอยู่ใน Sheet แล้ว)
+  const meter = db.meters.find(m => m.id === meterId);
+  const sheetLast = (meter && typeof getSheetLatestReading === 'function')
+    ? getSheetLatestReading(meter.building, meter.name, meter.type)
+    : null;
+
+  if (!localLast && !sheetLast) return null;
+  if (!localLast) return { value: sheetLast.value, date: sheetLast.date, source: 'sheet' };
+  if (!sheetLast) return { value: localLast.value, date: localLast.date, source: 'local' };
+
+  // มีทั้งคู่ — เอาอันที่วันที่ใหม่กว่า (ถ้าวันที่เท่ากันให้ถือว่า local แม่นกว่า เพราะเป็นข้อมูลสดจากเครื่องที่กำลังใช้งาน)
+  if (sheetLast.date > localLast.date) {
+    return { value: sheetLast.value, date: sheetLast.date, source: 'sheet' };
+  }
+  return { value: localLast.value, date: localLast.date, source: 'local' };
 }
 
 function updatePrevInfo() {
@@ -177,8 +195,9 @@ function updatePrevInfo() {
   if (!meterId) { prevBox.style.display = 'none'; return; }
   const last = getLastReading(meterId);
   if (last) {
+    const sourceLabel = last.source === 'sheet' ? ' (จาก Google Sheet)' : '';
     prevBox.style.display = 'block';
-    prevBox.innerHTML = `ค่าครั้งก่อน: <b>${last.value}</b> (วันที่ ${last.date})`;
+    prevBox.innerHTML = `ค่าครั้งก่อน: <b>${last.value}</b> (วันที่ ${last.date})${sourceLabel}`;
   } else {
     prevBox.style.display = 'block';
     prevBox.innerHTML = 'ยังไม่มีค่าก่อนหน้า (รายการแรก)';

@@ -63,6 +63,7 @@ async function trySyncNow() {
         if (typeof toast === 'function' && queue.length > 0) {
           toast(`ซิงก์ขึ้น Google Sheet แล้ว (${queue.length} รายการ)`);
         }
+        refreshSheetLatestCache(); // อัปเดต cache เลขล่าสุดให้ตรงกับ Sheet หลัง sync สำเร็จ
       }
     }
   } catch (err) {
@@ -97,3 +98,69 @@ document.addEventListener('DOMContentLoaded', () => {
   // ลองซิงก์ซ้ำเป็นระยะ เผื่อ event 'online' ไม่ยิง (บาง browser/OS)
   setInterval(trySyncNow, 30000);
 });
+
+// ===== ดึงเลขล่าสุดต่อห้อง+ประเภท จาก Google Sheet มา cache ไว้ =====
+// แก้ปัญหา: เครื่อง/อุปกรณ์ที่ไม่เคยมีประวัติห้องนั้นใน localStorage (เช่น ห้องที่ import
+// baseline เข้า Sheet ตรงๆ ไม่ผ่านแอป) จะไม่มีทาง "เลขครั้งก่อน" หลุดเป็น 0 อีกต่อไป —
+// เพราะ Sheet มีประวัติครบกว่าเครื่องเดียวเสมอ (ทุกเครื่อง sync เข้าที่เดียวกัน)
+const SHEET_LATEST_CACHE_KEY = 'meterapp_sheet_latest_cache_v1';
+
+function sheetLatestKey(building, meterName, type) {
+  return (building || '') + '||' + (meterName || '') + '||' + type;
+}
+
+function loadSheetLatestCache() {
+  try {
+    const raw = localStorage.getItem(SHEET_LATEST_CACHE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveSheetLatestCache(map) {
+  localStorage.setItem(SHEET_LATEST_CACHE_KEY, JSON.stringify(map));
+}
+
+// ดึง export ทั้งหมดจาก Sheet แล้วสรุปเหลือ "รายการล่าสุดต่อห้อง+ประเภท" เก็บเป็น cache
+// เรียกตอนเปิดแอป/แท็บบันทึก และหลัง sync สำเร็จ ไม่เรียกถี่เกินไป (fetch เดียวจบ ไม่ใช่ polling)
+let sheetLatestFetchInFlight = false;
+async function refreshSheetLatestCache() {
+  if (!SHEET_WEBAPP_URL) return;
+  if (sheetLatestFetchInFlight) return;
+  if (!navigator.onLine) return;
+  sheetLatestFetchInFlight = true;
+  try {
+    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export');
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data || !data.ok || !Array.isArray(data.readings)) return;
+
+    const map = {};
+    data.readings.forEach((r) => {
+      const key = sheetLatestKey(r.building, r.meterName, r.type);
+      const existing = map[key];
+      // เทียบวันที่ล่าสุด ไม่ใช่ลำดับแถวในชีต (กันกรณีแถวไม่เรียงวันที่)
+      if (!existing || (r.date || '') >= (existing.date || '')) {
+        map[key] = { value: r.value, date: r.date || '' };
+      }
+    });
+    saveSheetLatestCache(map);
+    if (typeof updatePrevInfo === 'function') updatePrevInfo();
+  } catch (err) {
+    // ออฟไลน์/ดึงไม่สำเร็จ — ใช้ cache เดิมที่มีอยู่ต่อไป
+  } finally {
+    sheetLatestFetchInFlight = false;
+  }
+}
+
+// คืนค่าล่าสุดของห้อง+ประเภทนี้จาก cache ของ Sheet (หรือ null ถ้าไม่เคยมี)
+function getSheetLatestReading(building, meterName, type) {
+  const map = loadSheetLatestCache();
+  return map[sheetLatestKey(building, meterName, type)] || null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  refreshSheetLatestCache();
+});
+window.addEventListener('online', refreshSheetLatestCache);
