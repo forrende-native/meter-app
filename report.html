@@ -59,7 +59,7 @@
     padding: 20px 14px 40px;
   }
   .card {
-    max-width: 920px;
+    max-width: 1400px;
     margin: 0 auto;
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -206,8 +206,8 @@
   table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 640px;
-    font-size: 14px;
+    min-width: 920px;
+    font-size: 13px;
   }
   thead th {
     position: sticky;
@@ -215,7 +215,7 @@
     z-index: 1;
     background: var(--head-bg);
     text-align: left;
-    padding: 10px 12px;
+    padding: 9px 9px;
     font-weight: 600;
     white-space: nowrap;
     border-bottom: 1px solid var(--border);
@@ -233,7 +233,7 @@
     font-size: 11px;
   }
   td {
-    padding: 9px 12px;
+    padding: 7px 9px;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
@@ -375,8 +375,12 @@
         <tr>
           <th data-key="building" data-type="text" tabindex="0" aria-sort="ascending">ตึก<span class="arrow">▲</span></th>
           <th data-key="room" data-type="natural" tabindex="0">ห้อง<span class="arrow"></span></th>
+          <th class="num" data-key="waterPrev" data-type="number" tabindex="0">น้ำครั้งก่อน<span class="arrow"></span></th>
+          <th class="num" data-key="waterCurr" data-type="number" tabindex="0">น้ำครั้งนี้<span class="arrow"></span></th>
           <th class="num" data-key="waterUnits" data-type="number" tabindex="0">น้ำ (หน่วย)<span class="arrow"></span></th>
           <th class="num" data-key="waterCost" data-type="number" tabindex="0">ค่าน้ำ (บาท)<span class="arrow"></span></th>
+          <th class="num" data-key="elecPrev" data-type="number" tabindex="0">ไฟครั้งก่อน<span class="arrow"></span></th>
+          <th class="num" data-key="elecCurr" data-type="number" tabindex="0">ไฟครั้งนี้<span class="arrow"></span></th>
           <th class="num" data-key="elecUnits" data-type="number" tabindex="0">ไฟ (หน่วย)<span class="arrow"></span></th>
           <th class="num" data-key="elecCost" data-type="number" tabindex="0">ค่าไฟ (บาท)<span class="arrow"></span></th>
           <th class="num" data-key="total" data-type="number" tabindex="0">รวม (บาท)<span class="arrow"></span></th>
@@ -501,8 +505,12 @@ function buildReport(readings) {
       map.set(key, {
         building: r.building || '',
         room: r.meterName || '',
+        waterPrev: null,
+        waterCurr: null,
         waterUnits: 0,
         waterCost: 0,
+        elecPrev: null,
+        elecCurr: null,
         elecUnits: 0,
         elecCost: 0,
       });
@@ -513,9 +521,13 @@ function buildReport(readings) {
     if (r.type === 'water') {
       row.waterUnits += units;
       row.waterCost += cost;
+      row.waterPrev = r.prevValue;
+      row.waterCurr = r.value;
     } else {
       row.elecUnits += units;
       row.elecCost += cost;
+      row.elecPrev = r.prevValue;
+      row.elecCurr = r.value;
     }
   });
 
@@ -598,6 +610,10 @@ function applyFiltersAndRender() {
   renderRows(rows, query);
 }
 
+function fmtMeter(v) {
+  return (v === null || v === undefined || v === '') ? '—' : numFmt.format(Number(v));
+}
+
 function renderRows(rows, hadQuery) {
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
@@ -606,7 +622,7 @@ function renderRows(rows, hadQuery) {
     const tr = document.createElement('tr');
     tr.className = 'empty-row';
     const td = document.createElement('td');
-    td.colSpan = 7;
+    td.colSpan = 11;
     td.textContent = 'ไม่พบห้องที่ตรงกับคำค้น';
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -624,6 +640,16 @@ function renderRows(rows, hadQuery) {
     tdRoom.textContent = r.room;
     tr.appendChild(tdRoom);
 
+    const tdWaterPrev = document.createElement('td');
+    tdWaterPrev.className = 'num';
+    tdWaterPrev.textContent = fmtMeter(r.waterPrev);
+    tr.appendChild(tdWaterPrev);
+
+    const tdWaterCurr = document.createElement('td');
+    tdWaterCurr.className = 'num';
+    tdWaterCurr.textContent = fmtMeter(r.waterCurr);
+    tr.appendChild(tdWaterCurr);
+
     const tdWaterUnits = document.createElement('td');
     tdWaterUnits.className = 'num';
     tdWaterUnits.textContent = numFmt.format(r.waterUnits);
@@ -633,6 +659,16 @@ function renderRows(rows, hadQuery) {
     tdWaterCost.className = 'num';
     tdWaterCost.textContent = numFmt.format(r.waterCost);
     tr.appendChild(tdWaterCost);
+
+    const tdElecPrev = document.createElement('td');
+    tdElecPrev.className = 'num';
+    tdElecPrev.textContent = fmtMeter(r.elecPrev);
+    tr.appendChild(tdElecPrev);
+
+    const tdElecCurr = document.createElement('td');
+    tdElecCurr.className = 'num';
+    tdElecCurr.textContent = fmtMeter(r.elecCurr);
+    tr.appendChild(tdElecCurr);
 
     const tdElecUnits = document.createElement('td');
     tdElecUnits.className = 'num' + (r.elecUnits > ELECTRIC_WARNING_UNITS ? ' warning' : '');
@@ -722,14 +758,18 @@ function getVisibleRows() {
   return rows;
 }
 
-const EXPORT_HEADERS = ['ตึก', 'ห้อง', 'น้ำ (หน่วย)', 'ค่าน้ำ (บาท)', 'ไฟ (หน่วย)', 'ค่าไฟ (บาท)', 'รวม (บาท)'];
+const EXPORT_HEADERS = ['ตึก', 'ห้อง', 'น้ำครั้งก่อน', 'น้ำครั้งนี้', 'น้ำ (หน่วย)', 'ค่าน้ำ (บาท)', 'ไฟครั้งก่อน', 'ไฟครั้งนี้', 'ไฟ (หน่วย)', 'ค่าไฟ (บาท)', 'รวม (บาท)'];
 
 function rowToCells(r) {
   return [
     r.building,
     r.room,
+    fmtMeter(r.waterPrev),
+    fmtMeter(r.waterCurr),
     numFmt.format(r.waterUnits),
     numFmt.format(r.waterCost),
+    fmtMeter(r.elecPrev),
+    fmtMeter(r.elecCurr),
     numFmt.format(r.elecUnits),
     numFmt.format(r.elecCost),
     numFmt.format(r.total),
@@ -766,12 +806,19 @@ function exportExcel() {
   if (rows.length === 0) { alert('ไม่มีข้อมูลให้ส่งออก'); return; }
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const headerCells = EXPORT_HEADERS.map(h => '<Cell><Data ss:Type="String">' + esc(h) + '</Data></Cell>').join('');
+  const numCell = v => (v === null || v === undefined || v === '')
+    ? '<Cell><Data ss:Type="String"></Data></Cell>'
+    : '<Cell><Data ss:Type="Number">' + Number(v) + '</Data></Cell>';
   const bodyRows = rows.map(r => {
     const cells = [
       '<Cell><Data ss:Type="String">' + esc(r.building) + '</Data></Cell>',
       '<Cell><Data ss:Type="String">' + esc(r.room) + '</Data></Cell>',
+      numCell(r.waterPrev),
+      numCell(r.waterCurr),
       '<Cell><Data ss:Type="Number">' + r.waterUnits + '</Data></Cell>',
       '<Cell><Data ss:Type="Number">' + r.waterCost + '</Data></Cell>',
+      numCell(r.elecPrev),
+      numCell(r.elecCurr),
       '<Cell><Data ss:Type="Number">' + r.elecUnits + '</Data></Cell>',
       '<Cell><Data ss:Type="Number">' + r.elecCost + '</Data></Cell>',
       '<Cell><Data ss:Type="Number">' + r.total + '</Data></Cell>',
