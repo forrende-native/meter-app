@@ -228,7 +228,7 @@ function updateSameDayWarning(meterId) {
   const last = getSheetLatestReading(meter.building, meter.name, meter.type);
   if (last && last.date === date) {
     warnBox.style.display = 'block';
-    warnBox.innerHTML = `⚠ ห้องนี้มีรายการวันที่ ${date} ใน Google Sheet อยู่แล้ว (เลขล่าสุด ${last.value}) กดบันทึกจะเป็นการคีย์ซ้ำ`;
+    warnBox.innerHTML = `⚠ เลขล่าสุด ${last.value}`;
   } else {
     warnBox.style.display = 'none';
   }
