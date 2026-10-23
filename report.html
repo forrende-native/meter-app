@@ -4,6 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>รายละเอียดรายห้อง — มิเตอร์น้ำ-ไฟ</title>
+<script>
+// PIN gate เบาๆ กันคนเดินผ่านมาเปิดดู (เหมือน index.html) — ใช้ key เดียวกันเพื่อ
+// ไม่ต้องใส่ซ้ำถ้าเพิ่งใส่ที่หน้าจดมาแล้วในแท็บเดียวกัน
+(function () {
+  var PIN = '655655';
+  var KEY = 'meterapp_pin_ok_v1';
+  if (sessionStorage.getItem(KEY) === '1') return;
+  document.documentElement.style.visibility = 'hidden';
+  function ask() {
+    var input = prompt('ใส่รหัส PIN');
+    if (input === null) {
+      document.documentElement.innerHTML = '<body style="font-family:sans-serif;padding:40px;text-align:center;">ต้องใส่รหัส PIN ถึงจะเข้าได้<br><button onclick="location.reload()" style="margin-top:14px;padding:10px 20px;">ลองใหม่</button></body>';
+      document.documentElement.style.visibility = 'visible';
+      return;
+    }
+    if (input === PIN) {
+      sessionStorage.setItem(KEY, '1');
+      document.documentElement.style.visibility = 'visible';
+    } else {
+      alert('รหัสไม่ถูกต้อง');
+      ask();
+    }
+  }
+  ask();
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
