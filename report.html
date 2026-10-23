@@ -232,13 +232,13 @@
     <table id="reportTable">
       <thead>
         <tr>
-          <th data-key="building" data-type="text" tabindex="0">ตึก<span class="arrow"></span></th>
+          <th data-key="building" data-type="text" tabindex="0" aria-sort="ascending">ตึก<span class="arrow">▲</span></th>
           <th data-key="room" data-type="natural" tabindex="0">ห้อง<span class="arrow"></span></th>
           <th class="num" data-key="waterUnits" data-type="number" tabindex="0">น้ำ (หน่วย)<span class="arrow"></span></th>
           <th class="num" data-key="waterCost" data-type="number" tabindex="0">ค่าน้ำ (บาท)<span class="arrow"></span></th>
           <th class="num" data-key="elecUnits" data-type="number" tabindex="0">ไฟ (หน่วย)<span class="arrow"></span></th>
           <th class="num" data-key="elecCost" data-type="number" tabindex="0">ค่าไฟ (บาท)<span class="arrow"></span></th>
-          <th class="num" data-key="total" data-type="number" tabindex="0" aria-sort="descending">รวม (บาท)<span class="arrow">▼</span></th>
+          <th class="num" data-key="total" data-type="number" tabindex="0">รวม (บาท)<span class="arrow"></span></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -261,9 +261,18 @@ const numFmt = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 });
 
 let fullRows = [];       // ข้อมูลหลังรวม pivot ทั้งหมด (ยังไม่กรอง)
 let currentBuilding = 'all';
-let sortKey = 'total';
-let sortDir = 'desc';
+let sortKey = 'building';
+let sortDir = 'asc';
 let maxTotal = 0;
+
+// ลำดับตึกที่ต้องการให้เรียงเป็นค่าเริ่มต้นเสมอ — แก้ลำดับ/เพิ่มตึกใหม่ได้ที่นี่ที่เดียว
+// ตึกที่ไม่อยู่ในลิสต์นี้ (เช่นเพิ่มเข้ามาใหม่แล้วยังไม่ได้แก้ตรงนี้) จะถูกเรียงไปต่อท้ายสุด
+const BUILDING_ORDER = ['เพิ่มทรัพย์', 'ปานมณี', 'บ้านเช่า'];
+
+function buildingSortIndex(building) {
+  const idx = BUILDING_ORDER.indexOf(building);
+  return idx === -1 ? BUILDING_ORDER.length : idx;
+}
 
 function naturalCompare(a, b) {
   const ax = String(a).match(/\d+|\D+/g) || [];
@@ -424,7 +433,8 @@ function applyFiltersAndRender() {
     if (col === 'room') {
       cmp = naturalCompare(a.room, b.room);
     } else if (col === 'building') {
-      cmp = a.building.localeCompare(b.building, 'th');
+      cmp = buildingSortIndex(a.building) - buildingSortIndex(b.building);
+      if (cmp === 0) cmp = naturalCompare(a.room, b.room); // ตึกเดียวกัน เรียงเลขห้องต่อเสมอ
     } else {
       cmp = (a[col] || 0) - (b[col] || 0);
     }
