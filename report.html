@@ -134,6 +134,62 @@
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
+  .header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .menu-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .menu-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    line-height: 1;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .menu-btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .menu-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 200px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    overflow: hidden;
+    z-index: 20;
+  }
+  .menu-dropdown.open { display: block; }
+  .menu-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    border: none;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .menu-dropdown button:hover,
+  .menu-dropdown button:focus-visible {
+    background: var(--row-hover);
+    outline: none;
+  }
   .status {
     font-size: 13px;
     color: var(--text-muted);
@@ -213,13 +269,98 @@
     padding: 24px 12px;
     white-space: normal;
   }
+  .preview-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 50;
+    padding: 20px;
+    overflow: auto;
+  }
+  .preview-overlay.open { display: flex; justify-content: center; align-items: flex-start; }
+  .preview-box {
+    background: var(--card-bg);
+    border-radius: 12px;
+    max-width: 860px;
+    width: 100%;
+    padding: 20px;
+    color: var(--text);
+  }
+  .preview-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 10px;
+  }
+  .preview-toolbar h2 {
+    margin: 0;
+    font-size: 17px;
+  }
+  .preview-actions { display: flex; gap: 8px; }
+  .preview-actions button {
+    padding: 8px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .preview-actions .primary {
+    background: var(--btn-active-bg);
+    color: var(--btn-active-text);
+    border-color: var(--btn-active-bg);
+  }
+  #previewContent {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 70vh;
+    overflow: auto;
+  }
+  #previewContent table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 0;
+  }
+  #previewContent th, #previewContent td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    white-space: nowrap;
+  }
+  #previewContent th.num, #previewContent td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  #previewContent h3 { margin: 0 0 10px; font-size: 16px; }
+  @media print {
+    body * { visibility: hidden; }
+    #previewContent, #previewContent * { visibility: visible; }
+    #previewContent {
+      position: absolute;
+      left: 0; top: 0; width: 100%;
+      border: none; max-height: none; overflow: visible;
+    }
+  }
 </style>
 </head>
 <body>
 <div class="card">
   <a href="index.html" class="back-link">&larr; กลับหน้าแรก</a>
   <p class="eyebrow" id="eyebrow">มิเตอร์น้ำ-ไฟ</p>
-  <h1>รายละเอียดรายห้อง</h1>
+  <div class="header-row">
+    <h1 id="h1Text">รายละเอียดรายห้อง</h1>
+    <div class="menu-wrap">
+      <button type="button" class="menu-btn" id="menuBtn" aria-label="เมนูส่งออก" aria-haspopup="true" aria-expanded="false">&#9776;</button>
+      <div class="menu-dropdown" id="menuDropdown" role="menu">
+        <button type="button" data-action="preview-print" role="menuitem">ดูตัวอย่างก่อนพิมพ์ / PDF</button>
+        <button type="button" data-action="excel" role="menuitem">ส่งออก Excel (.xlsx)</button>
+        <button type="button" data-action="word" role="menuitem">ส่งออก Word (.doc)</button>
+      </div>
+    </div>
+  </div>
   <div class="controls">
     <input type="search" id="searchInput" placeholder="ค้นหาห้อง เช่น 305" aria-label="ค้นหาห้อง">
     <div class="building-filter" role="group" aria-label="กรองตึก" id="buildingFilter">
@@ -243,6 +384,19 @@
       </thead>
       <tbody id="tbody"></tbody>
     </table>
+  </div>
+</div>
+
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-box">
+    <div class="preview-toolbar">
+      <h2>ตัวอย่างก่อนพิมพ์</h2>
+      <div class="preview-actions">
+        <button type="button" id="previewCloseBtn">ปิด</button>
+        <button type="button" class="primary" id="previewPrintBtn">พิมพ์ / บันทึก PDF</button>
+      </div>
+    </div>
+    <div id="previewContent"></div>
   </div>
 </div>
 
@@ -541,8 +695,180 @@ function setupFilters() {
   }
 }
 
+// คืนรายการแถวที่กำลังแสดงอยู่บนจอตอนนี้จริง ๆ (กรอง+เรียงแล้ว) เพื่อให้
+// ทุกช่องทางส่งออก (Excel/Word/PDF) ตรงกับสิ่งที่เห็นบนตารางเสมอ ไม่ใช่ข้อมูลดิบทั้งหมด
+function getVisibleRows() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  let rows = fullRows.slice();
+  if (currentBuilding !== 'all') {
+    rows = rows.filter(r => r.building === currentBuilding);
+  }
+  if (query) {
+    rows = rows.filter(r => r.room.toLowerCase().includes(query));
+  }
+  rows.sort((a, b) => {
+    let cmp;
+    const col = sortKey;
+    if (col === 'room') {
+      cmp = naturalCompare(a.room, b.room);
+    } else if (col === 'building') {
+      cmp = buildingSortIndex(a.building) - buildingSortIndex(b.building);
+      if (cmp === 0) cmp = naturalCompare(a.room, b.room);
+    } else {
+      cmp = (a[col] || 0) - (b[col] || 0);
+    }
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+  return rows;
+}
+
+const EXPORT_HEADERS = ['ตึก', 'ห้อง', 'น้ำ (หน่วย)', 'ค่าน้ำ (บาท)', 'ไฟ (หน่วย)', 'ค่าไฟ (บาท)', 'รวม (บาท)'];
+
+function rowToCells(r) {
+  return [
+    r.building,
+    r.room,
+    numFmt.format(r.waterUnits),
+    numFmt.format(r.waterCost),
+    numFmt.format(r.elecUnits),
+    numFmt.format(r.elecCost),
+    numFmt.format(r.total),
+  ];
+}
+
+function buildExportHtmlTable(rows) {
+  const theadCells = EXPORT_HEADERS.map((h, i) => '<th' + (i >= 2 ? ' class="num"' : '') + '>' + h + '</th>').join('');
+  const bodyRows = rows.map(r => {
+    const cells = rowToCells(r).map((v, i) => '<td' + (i >= 2 ? ' class="num"' : '') + '>' + v + '</td>').join('');
+    return '<tr>' + cells + '</tr>';
+  }).join('');
+  return '<table><thead><tr>' + theadCells + '</tr></thead><tbody>' + bodyRows + '</tbody></table>';
+}
+
+function reportTitle() {
+  return document.getElementById('eyebrow').textContent + ' · ' + document.getElementById('h1Text').textContent;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Excel: SpreadsheetML XML เปิดด้วย Excel ได้ตรง ๆ ไม่ใช่แค่ CSV ดิบ (รองรับ .xlsx จริง)
+function exportExcel() {
+  const rows = getVisibleRows();
+  if (rows.length === 0) { alert('ไม่มีข้อมูลให้ส่งออก'); return; }
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const headerCells = EXPORT_HEADERS.map(h => '<Cell><Data ss:Type="String">' + esc(h) + '</Data></Cell>').join('');
+  const bodyRows = rows.map(r => {
+    const cells = [
+      '<Cell><Data ss:Type="String">' + esc(r.building) + '</Data></Cell>',
+      '<Cell><Data ss:Type="String">' + esc(r.room) + '</Data></Cell>',
+      '<Cell><Data ss:Type="Number">' + r.waterUnits + '</Data></Cell>',
+      '<Cell><Data ss:Type="Number">' + r.waterCost + '</Data></Cell>',
+      '<Cell><Data ss:Type="Number">' + r.elecUnits + '</Data></Cell>',
+      '<Cell><Data ss:Type="Number">' + r.elecCost + '</Data></Cell>',
+      '<Cell><Data ss:Type="Number">' + r.total + '</Data></Cell>',
+    ].join('');
+    return '<Row>' + cells + '</Row>';
+  }).join('');
+  const xml = '<?xml version="1.0"?>' +
+    '<?mso-application progid="Excel.Sheet"?>' +
+    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+    '<Worksheet ss:Name="รายละเอียดรายห้อง"><Table>' +
+    '<Row>' + headerCells + '</Row>' +
+    bodyRows +
+    '</Table></Worksheet></Workbook>';
+  const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+  downloadBlob(blob, 'รายละเอียดรายห้อง.xls');
+}
+
+// Word: HTML ที่ Word เปิดเป็นเอกสารได้ตรง ๆ (นามสกุล .doc)
+function exportWord() {
+  const rows = getVisibleRows();
+  if (rows.length === 0) { alert('ไม่มีข้อมูลให้ส่งออก'); return; }
+  const table = buildExportHtmlTable(rows);
+  const html = '<html><head><meta charset="UTF-8"><style>' +
+    'body{font-family:"TH Sarabun New","Leelawadee UI",sans-serif;}' +
+    'table{border-collapse:collapse;width:100%;}' +
+    'th,td{border:1px solid #999;padding:6px 10px;}' +
+    'th{background:#eee;}' +
+    'td.num,th.num{text-align:right;}' +
+    '</style></head><body>' +
+    '<h3>' + reportTitle() + '</h3>' +
+    table +
+    '</body></html>';
+  const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+  downloadBlob(blob, 'รายละเอียดรายห้อง.doc');
+}
+
+function openPreview() {
+  const rows = getVisibleRows();
+  const content = document.getElementById('previewContent');
+  if (rows.length === 0) {
+    content.innerHTML = '<p>ไม่มีข้อมูลให้แสดง</p>';
+  } else {
+    content.innerHTML = '<h3>' + reportTitle() + '</h3>' + buildExportHtmlTable(rows);
+  }
+  document.getElementById('previewOverlay').classList.add('open');
+}
+
+function closePreview() {
+  document.getElementById('previewOverlay').classList.remove('open');
+}
+
+function setupMenu() {
+  const menuBtn = document.getElementById('menuBtn');
+  const dropdown = document.getElementById('menuDropdown');
+
+  function closeMenu() {
+    dropdown.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+  function toggleMenu() {
+    const open = dropdown.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && e.target !== menuBtn) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeMenu(); closePreview(); }
+  });
+
+  dropdown.querySelectorAll('button[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      closeMenu();
+      const action = btn.dataset.action;
+      if (action === 'excel') exportExcel();
+      else if (action === 'word') exportWord();
+      else if (action === 'preview-print') openPreview();
+    });
+  });
+
+  document.getElementById('previewCloseBtn').addEventListener('click', closePreview);
+  document.getElementById('previewOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'previewOverlay') closePreview();
+  });
+  document.getElementById('previewPrintBtn').addEventListener('click', () => {
+    window.print();
+  });
+}
+
 setupSorting();
 setupFilters();
+setupMenu();
 loadData();
 </script>
 </body>
