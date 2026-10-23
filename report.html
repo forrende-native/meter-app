@@ -222,10 +222,8 @@
   <h1>รายละเอียดรายห้อง</h1>
   <div class="controls">
     <input type="search" id="searchInput" placeholder="ค้นหาห้อง เช่น 305" aria-label="ค้นหาห้อง">
-    <div class="building-filter" role="group" aria-label="กรองตึก">
+    <div class="building-filter" role="group" aria-label="กรองตึก" id="buildingFilter">
       <button type="button" class="filter-btn active" data-building="all">ทั้งหมด</button>
-      <button type="button" class="filter-btn" data-building="เพิ่มทรัพย์">เพิ่มทรัพย์</button>
-      <button type="button" class="filter-btn" data-building="ปานมณี">ปานมณี</button>
     </div>
     <button type="button" class="filter-btn" id="refreshBtn" aria-label="รีเฟรชข้อมูล">↻ รีเฟรช</button>
   </div>
@@ -364,8 +362,49 @@ function buildReport(readings) {
   }));
   maxTotal = fullRows.reduce((m, r) => Math.max(m, r.total), 0);
 
+  renderBuildingFilterButtons();
   setStatus('ข้อมูล ' + fullRows.length + ' ห้อง');
   applyFiltersAndRender();
+}
+
+// สร้างปุ่มกรองตึกจากข้อมูลจริงในชีตเสมอ (ไม่ hardcode ชื่อตึก) กันกรณีมีตึกใหม่
+// เพิ่มเข้ามาในอนาคตแล้วปุ่มกรองไม่อัปเดตตาม (เช่นเคย hardcode แค่ 2 ตึกไว้ ตอนมีตึกที่ 3
+// เข้ามาจริงในชีตแล้วปุ่มกรองไม่โผล่ ต้องแก้โค้ดเองถึงจะกรองได้)
+function renderBuildingFilterButtons() {
+  const wrap = document.getElementById('buildingFilter');
+  if (!wrap) return;
+  const buildings = Array.from(new Set(fullRows.map(r => r.building).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'th'));
+  // ถ้าตึกที่เลือกอยู่ไม่มีอยู่ในข้อมูลแล้ว (เช่นข้อมูลเปลี่ยนไปหลัง refresh) กลับไปที่ "ทั้งหมด"
+  if (currentBuilding !== 'all' && !buildings.includes(currentBuilding)) {
+    currentBuilding = 'all';
+  }
+  wrap.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.className = 'filter-btn' + (currentBuilding === 'all' ? ' active' : '');
+  allBtn.dataset.building = 'all';
+  allBtn.textContent = 'ทั้งหมด';
+  wrap.appendChild(allBtn);
+  buildings.forEach(b => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'filter-btn' + (currentBuilding === b ? ' active' : '');
+    btn.dataset.building = b;
+    btn.textContent = b;
+    wrap.appendChild(btn);
+  });
+  attachBuildingFilterHandlers();
+}
+
+function attachBuildingFilterHandlers() {
+  document.querySelectorAll('.filter-btn[data-building]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn[data-building]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentBuilding = btn.dataset.building;
+      applyFiltersAndRender();
+    });
+  });
 }
 
 function applyFiltersAndRender() {
@@ -486,14 +525,6 @@ function setupSorting() {
 
 function setupFilters() {
   document.getElementById('searchInput').addEventListener('input', applyFiltersAndRender);
-  document.querySelectorAll('.filter-btn[data-building]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn[data-building]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentBuilding = btn.dataset.building;
-      applyFiltersAndRender();
-    });
-  });
   const refreshBtn = document.getElementById('refreshBtn');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => loadData());
