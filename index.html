@@ -29,28 +29,42 @@
   <section id="tab-readings" class="tab-content active">
     <div class="card">
       <h2>บันทึกค่ามิเตอร์ใหม่</h2>
-      <label>เลือกตึก</label>
-      <select id="buildingSelect"></select>
 
-      <label>เลือกมิเตอร์/ห้อง</label>
-      <select id="meterSelect"></select>
+      <label>1. เลือกตึก</label>
+      <div class="building-filter" id="buildingFilter"></div>
 
-      <div id="prevInfo" class="prev-info"></div>
+      <label>2. ค้นหาห้อง</label>
+      <input type="text" id="roomSearch" placeholder="พิมพ์เลขห้อง...">
+      <div class="room-list" id="roomList"></div>
+
+      <label>3. เลือกประเภท</label>
+      <div class="type-toggle">
+        <button type="button" class="type-btn water" id="typeWaterBtn" disabled>
+          <span class="icon">💧</span> น้ำ
+        </button>
+        <button type="button" class="type-btn electric" id="typeElectricBtn" disabled>
+          <span class="icon">⚡</span> ไฟ
+        </button>
+      </div>
+
+      <div class="selection-summary" id="selectionSummary">
+        <div class="headline" id="summaryHeadline"></div>
+        <div class="prev-line" id="prevInfo"></div>
+      </div>
+      <div id="sameDayWarning" class="same-day-warning"></div>
 
       <label>วันที่จด</label>
       <input type="date" id="readingDate">
 
-      <div id="sameDayWarning" class="same-day-warning"></div>
-
       <label>เลขมิเตอร์ปัจจุบัน</label>
-      <input type="number" step="0.01" id="currentReading" placeholder="เช่น 1234.5">
+      <input type="number" step="0.01" id="currentReading" placeholder="เช่น 1234.5" disabled>
 
       <label>หมายเหตุ (ถ้ามี)</label>
       <input type="text" id="readingNote" placeholder="เช่น เปลี่ยนมิเตอร์ใหม่">
 
       <div id="calcPreview" class="calc-preview"></div>
 
-      <button id="saveReadingBtn" class="btn-primary">บันทึก</button>
+      <button id="saveReadingBtn" class="btn-primary" disabled>บันทึก</button>
     </div>
   </section>
 

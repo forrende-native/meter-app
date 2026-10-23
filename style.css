@@ -137,6 +137,90 @@ input:focus, select:focus { outline: none; border-color: #1565c0; background: #f
   display: none;
 }
 
+/* ===== หน้าบันทึก: เลือกตึก/ค้นหาห้อง/เลือกประเภท ===== */
+.building-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.building-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #d0d5dc;
+  border-radius: 8px;
+  background: #f7f8fa;
+  color: #1a1a1a;
+  cursor: pointer;
+  font-family: inherit;
+}
+.building-btn.active {
+  background: #1565c0;
+  color: #fff;
+  border-color: #1565c0;
+}
+
+.room-list {
+  margin-top: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+}
+.room-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e1e4e8;
+  cursor: pointer;
+  font-size: 15px;
+}
+.room-row:last-child { border-bottom: none; }
+.room-row:hover { background: #f5f7fa; }
+.room-row.selected { background: #eef4fc; font-weight: 600; }
+.room-row .room-name { font-weight: 600; }
+.room-row .room-meta { font-size: 12px; color: #6b7280; font-weight: 400; }
+.room-row mark { background: #fff176; color: inherit; border-radius: 2px; padding: 0 1px; }
+.no-room-match { padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
+
+.type-toggle { display: flex; gap: 10px; }
+.type-btn {
+  flex: 1;
+  padding: 16px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid #d0d5dc;
+  border-radius: 10px;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+}
+.type-btn .icon { font-size: 22px; }
+.type-btn.active.water { border-color: #1976d2; background: #e3f2fd; color: #1565c0; }
+.type-btn.active.electric { border-color: #f9a825; background: #fff8e1; color: #c77800; }
+.type-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.selection-summary {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #eef4fc;
+  border: 1px solid #c7ddf5;
+  display: none;
+}
+.selection-summary.show { display: block; }
+.selection-summary .headline { font-size: 17px; font-weight: 700; color: #1565c0; }
+.selection-summary .prev-line { margin-top: 6px; font-size: 14px; color: #333; }
+.selection-summary .prev-line b { font-size: 16px; }
+
 .list { margin-top: 10px; }
 .list-item {
   display: flex;

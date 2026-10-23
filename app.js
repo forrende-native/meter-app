@@ -51,8 +51,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.dataset.tab === 'history') renderHistory();
     if (btn.dataset.tab === 'meters') renderMeterList();
     if (btn.dataset.tab === 'readings') {
-      populateBuildingSelect();
-      populateMeterSelect();
+      renderBuildingFilter();
+      renderRoomList();
+      updateTypeButtons();
       updatePrevInfo();
       // รีเฟรช cache จาก Sheet ทุกครั้งที่เข้าแท็บนี้ ลดโอกาสเจอเลขเก่า/ค้าง
       if (typeof refreshSheetLatestCache === 'function') refreshSheetLatestCache();
@@ -80,50 +81,117 @@ function getBuildings() {
   return Array.from(set).sort();
 }
 
-function populateBuildingSelect() {
-  const sel = document.getElementById('buildingSelect');
-  if (!sel) return;
-  const prevVal = sel.value;
-  const buildings = getBuildings();
-  sel.innerHTML = '<option value="">ทั้งหมด</option>';
-  buildings.forEach(b => sel.appendChild(new Option(b, b)));
-  if (prevVal && buildings.includes(prevVal)) sel.value = prevVal;
+// ===== หน้าบันทึก: state ของการเลือกตึก/ห้อง/ประเภท =====
+let selectedBuildingFilter = 'ทั้งหมด';
+let selectedMeterId = null; // มิเตอร์ (ห้อง+ประเภท) ที่เลือกอยู่ตอนนี้ — แทน meterSelect.value เดิม
+
+function getRoomNamesForBuilding(building) {
+  // รวมห้องที่มีทั้งน้ำ/ไฟ ให้เหลือ 1 แถวต่อห้อง (ไม่แยกตามประเภทเหมือนเดิม)
+  const filtered = building === 'ทั้งหมด'
+    ? db.meters
+    : db.meters.filter(m => (m.building || 'ไม่ระบุตึก') === building);
+  const seen = new Map(); // key: building||name -> {building, name}
+  filtered.forEach(m => {
+    const key = (m.building || '') + '||' + m.name;
+    if (!seen.has(key)) seen.set(key, { building: m.building || '', name: m.name });
+  });
+  return Array.from(seen.values());
 }
 
-function populateMeterSelect() {
-  const sel = document.getElementById('meterSelect');
-  const histSel = document.getElementById('historyFilter');
-  const buildingSel = document.getElementById('buildingSelect');
-  const selectedBuilding = buildingSel ? buildingSel.value : '';
-  const prevVal = sel.value;
-  sel.innerHTML = '';
-  histSel.innerHTML = '<option value="">ทั้งหมด</option>';
-  if (db.meters.length === 0) {
-    sel.innerHTML = '<option value="">-- ยังไม่มีมิเตอร์ เพิ่มที่แท็บ "มิเตอร์/ห้อง" --</option>';
+function findMeter(building, name, type) {
+  return db.meters.find(m => (m.building || '') === building && m.name === name && m.type === type);
+}
+
+function renderBuildingFilter() {
+  const wrap = document.getElementById('buildingFilter');
+  if (!wrap) return;
+  const buildings = ['ทั้งหมด', ...getBuildings()];
+  wrap.innerHTML = '';
+  buildings.forEach(b => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'building-btn' + (b === selectedBuildingFilter ? ' active' : '');
+    btn.textContent = b;
+    btn.addEventListener('click', () => {
+      selectedBuildingFilter = b;
+      renderBuildingFilter();
+      renderRoomList();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function highlightMatch(text, query) {
+  if (!query) return escapeHtml(text);
+  const idx = text.indexOf(query);
+  if (idx === -1) return escapeHtml(text);
+  return escapeHtml(text.slice(0, idx)) + '<mark>' + escapeHtml(text.slice(idx, idx + query.length)) + '</mark>' + escapeHtml(text.slice(idx + query.length));
+}
+
+// ห้องที่เลือกอยู่ตอนนี้ (ก่อนเลือกประเภท) — ใช้ตอนกดปุ่มน้ำ/ไฟ
+let selectedRoomBuilding = null;
+let selectedRoomName = null;
+
+function renderRoomList() {
+  const listEl = document.getElementById('roomList');
+  if (!listEl) return;
+  const searchInput = document.getElementById('roomSearch');
+  const query = searchInput ? searchInput.value.trim() : '';
+  let rooms = getRoomNamesForBuilding(selectedBuildingFilter);
+  if (query) rooms = rooms.filter(r => r.name.includes(query));
+  rooms.sort((a, b) => a.name.localeCompare(b.name, 'th', { numeric: true }));
+
+  listEl.innerHTML = '';
+  if (rooms.length === 0) {
+    listEl.innerHTML = '<div class="no-room-match">ไม่พบห้องที่ตรงกับคำค้น</div>';
     return;
   }
-  const filtered = selectedBuilding
-    ? db.meters.filter(m => (m.building || 'ไม่ระบุตึก') === selectedBuilding)
-    : db.meters;
-  if (filtered.length === 0) {
-    sel.innerHTML = '<option value="">-- ไม่มีมิเตอร์ในตึกนี้ --</option>';
-  } else {
-    filtered.forEach(m => {
-      const label = `${m.name} (${m.type === 'water' ? 'น้ำ' : 'ไฟ'})`;
-      sel.appendChild(new Option(label, m.id));
+  rooms.forEach(r => {
+    const row = document.createElement('div');
+    const isSelected = selectedRoomBuilding === r.building && selectedRoomName === r.name;
+    row.className = 'room-row' + (isSelected ? ' selected' : '');
+    row.innerHTML =
+      '<span class="room-name">' + highlightMatch(r.name, query) + '</span>' +
+      '<span class="room-meta">' + escapeHtml(r.building) + '</span>';
+    row.addEventListener('click', () => {
+      selectedRoomBuilding = r.building;
+      selectedRoomName = r.name;
+      selectedMeterId = null; // ต้องเลือกประเภทใหม่ทุกครั้งที่เปลี่ยนห้อง
+      renderRoomList();
+      updateTypeButtons();
+      updatePrevInfo();
     });
-  }
-  db.meters.forEach(m => {
-    const label = `${m.building ? m.building + ' ' : ''}${m.name} (${m.type === 'water' ? 'น้ำ' : 'ไฟ'})`;
-    histSel.appendChild(new Option(label, m.id));
+    listEl.appendChild(row);
   });
-  if (prevVal) sel.value = prevVal;
 }
 
-document.getElementById('buildingSelect').addEventListener('change', () => {
-  populateMeterSelect();
+function updateTypeButtons() {
+  const waterBtn = document.getElementById('typeWaterBtn');
+  const elecBtn = document.getElementById('typeElectricBtn');
+  if (!waterBtn || !elecBtn) return;
+  const roomChosen = !!(selectedRoomBuilding && selectedRoomName);
+  const hasWater = roomChosen && !!findMeter(selectedRoomBuilding, selectedRoomName, 'water');
+  const hasElectric = roomChosen && !!findMeter(selectedRoomBuilding, selectedRoomName, 'electric');
+  waterBtn.disabled = !hasWater;
+  elecBtn.disabled = !hasElectric;
+
+  const currentMeter = selectedMeterId ? db.meters.find(m => m.id === selectedMeterId) : null;
+  waterBtn.classList.toggle('active', !!currentMeter && currentMeter.type === 'water');
+  elecBtn.classList.toggle('active', !!currentMeter && currentMeter.type === 'electric');
+}
+
+function selectType(type) {
+  if (!selectedRoomBuilding || !selectedRoomName) return;
+  const meter = findMeter(selectedRoomBuilding, selectedRoomName, type);
+  if (!meter) return;
+  selectedMeterId = meter.id;
+  updateTypeButtons();
   updatePrevInfo();
-});
+}
+
+document.getElementById('typeWaterBtn').addEventListener('click', () => selectType('water'));
+document.getElementById('typeElectricBtn').addEventListener('click', () => selectType('electric'));
+document.getElementById('roomSearch').addEventListener('input', renderRoomList);
 
 function renderMeterList() {
   const wrap = document.getElementById('meterList');
@@ -151,6 +219,18 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+function populateHistoryFilter() {
+  const histSel = document.getElementById('historyFilter');
+  if (!histSel) return;
+  const prevVal = histSel.value;
+  histSel.innerHTML = '<option value="">ทั้งหมด</option>';
+  db.meters.forEach(m => {
+    const label = `${m.building ? m.building + ' ' : ''}${m.name} (${m.type === 'water' ? 'น้ำ' : 'ไฟ'})`;
+    histSel.appendChild(new Option(label, m.id));
+  });
+  if (prevVal) histSel.value = prevVal;
+}
+
 document.getElementById('addMeterBtn').addEventListener('click', () => {
   const name = document.getElementById('meterName').value.trim();
   const type = document.getElementById('meterType').value;
@@ -166,8 +246,9 @@ document.getElementById('addMeterBtn').addEventListener('click', () => {
   document.getElementById('meterName').value = '';
   document.getElementById('meterBuilding').value = '';
   renderMeterList();
-  populateBuildingSelect();
-  populateMeterSelect();
+  renderBuildingFilter();
+  renderRoomList();
+  populateHistoryFilter();
   toast('เพิ่มมิเตอร์แล้ว');
 });
 
@@ -186,30 +267,49 @@ function getLastReading(meterId) {
 }
 
 function updatePrevInfo() {
-  const meterId = document.getElementById('meterSelect').value;
+  const meterId = selectedMeterId;
+  const summaryBox = document.getElementById('selectionSummary');
+  const headlineEl = document.getElementById('summaryHeadline');
   const prevBox = document.getElementById('prevInfo');
   const saveBtn = document.getElementById('saveReadingBtn');
-  if (!meterId) { prevBox.style.display = 'none'; return; }
+  const currentInput = document.getElementById('currentReading');
+
+  if (!meterId) {
+    if (summaryBox) summaryBox.classList.remove('show');
+    if (currentInput) currentInput.disabled = true;
+    if (saveBtn) saveBtn.disabled = true;
+    const warnBox = document.getElementById('sameDayWarning');
+    if (warnBox) warnBox.style.display = 'none';
+    return;
+  }
+
+  const meter = db.meters.find(m => m.id === meterId);
+  const typeLabel = meter && meter.type === 'water' ? 'น้ำ' : 'ไฟ';
+  const typeIcon = meter && meter.type === 'water' ? '💧' : '⚡';
+  if (headlineEl && meter) {
+    headlineEl.textContent = `${typeIcon} กำลังจด: ${meter.building || ''} ${meter.name} (${typeLabel})`;
+  }
 
   const cacheEverFetched = typeof hasSheetCacheEverSucceeded === 'function' && hasSheetCacheEverSucceeded();
   const last = getLastReading(meterId);
 
   if (last) {
-    prevBox.style.display = 'block';
     prevBox.innerHTML = `ค่าครั้งก่อน: <b>${last.value}</b> (วันที่ ${last.date}) (จาก Google Sheet)`;
+    if (currentInput) currentInput.disabled = false;
     if (saveBtn) saveBtn.disabled = false;
   } else if (!cacheEverFetched) {
     // ไม่เคยดึง Sheet สำเร็จเลย (ออฟไลน์/ยังไม่เคยเปิดเน็ต) — ไม่รู้ค่าก่อนหน้าจริงๆ ไม่ให้บันทึก
     // กันปัญหา prevValue หลุดเป็น 0 แบบเงียบๆ (เกิดซ้ำกับห้อง 409, C2 เพราะข้ามขั้นตอนนี้)
-    prevBox.style.display = 'block';
     prevBox.innerHTML = 'ไม่สามารถดึงเลขล่าสุดจาก Google Sheet ได้ (ต้องมีเน็ตอย่างน้อยครั้งแรก) — ยังบันทึกไม่ได้';
+    if (currentInput) currentInput.disabled = true;
     if (saveBtn) saveBtn.disabled = true;
   } else {
     // ดึง Sheet สำเร็จแล้ว แต่ไม่พบประวัติห้องนี้เลยจริงๆ = มิเตอร์ใหม่ รายการแรก
-    prevBox.style.display = 'block';
     prevBox.innerHTML = 'ยังไม่มีค่าก่อนหน้า (รายการแรกของมิเตอร์นี้)';
+    if (currentInput) currentInput.disabled = false;
     if (saveBtn) saveBtn.disabled = false;
   }
+  if (summaryBox) summaryBox.classList.add('show');
   updateCalcPreview();
   updateSameDayWarning(meterId);
 }
@@ -235,7 +335,7 @@ function updateSameDayWarning(meterId) {
 }
 
 function updateCalcPreview() {
-  const meterId = document.getElementById('meterSelect').value;
+  const meterId = selectedMeterId;
   const curVal = parseFloat(document.getElementById('currentReading').value);
   const box = document.getElementById('calcPreview');
   if (!meterId || isNaN(curVal)) { box.style.display = 'none'; return; }
@@ -246,22 +346,20 @@ function updateCalcPreview() {
   box.innerHTML = `หน่วยที่ใช้: <b>${consumed.toFixed(2)}</b> หน่วย`;
 }
 
-document.getElementById('meterSelect').addEventListener('change', updatePrevInfo);
 document.getElementById('currentReading').addEventListener('input', updateCalcPreview);
 document.getElementById('readingDate').addEventListener('change', () => {
-  const meterId = document.getElementById('meterSelect').value;
-  updateSameDayWarning(meterId);
+  updateSameDayWarning(selectedMeterId);
 });
 
 // default date = today
 document.getElementById('readingDate').value = new Date().toISOString().slice(0, 10);
 
 document.getElementById('saveReadingBtn').addEventListener('click', () => {
-  const meterId = document.getElementById('meterSelect').value;
+  const meterId = selectedMeterId;
   const date = document.getElementById('readingDate').value;
   const value = parseFloat(document.getElementById('currentReading').value);
   const note = document.getElementById('readingNote').value.trim();
-  if (!meterId) { toast('กรุณาเลือกมิเตอร์/ห้องก่อน'); return; }
+  if (!meterId) { toast('กรุณาเลือกห้องและประเภทก่อน'); return; }
   if (!date) { toast('กรุณาเลือกวันที่'); return; }
   if (isNaN(value)) { toast('กรุณากรอกเลขมิเตอร์'); return; }
 
@@ -457,8 +555,9 @@ document.getElementById('restoreFile').addEventListener('change', (e) => {
       if (!confirm('การกู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ดำเนินการต่อ?')) return;
       db = data;
       saveDB(db);
-      populateBuildingSelect();
-      populateMeterSelect();
+      renderBuildingFilter();
+      renderRoomList();
+      populateHistoryFilter();
       renderMeterList();
       renderHistory();
       toast('กู้คืนข้อมูลแล้ว');
@@ -474,8 +573,9 @@ document.getElementById('clearAllBtn').addEventListener('click', () => {
   if (!confirm('ล้างข้อมูลทั้งหมด? การกระทำนี้ย้อนกลับไม่ได้ (แนะนำสำรองข้อมูลก่อน)')) return;
   db = { meters: [], readings: [] };
   saveDB(db);
-  populateBuildingSelect();
-  populateMeterSelect();
+  renderBuildingFilter();
+  renderRoomList();
+  populateHistoryFilter();
   renderMeterList();
   renderHistory();
   toast('ล้างข้อมูลแล้ว');
@@ -513,8 +613,10 @@ if (db.meters.length === 0 && window.SEED_METERS && window.SEED_METERS.length) {
 }
 
 // ===== Init =====
-populateBuildingSelect();
-populateMeterSelect();
+renderBuildingFilter();
+renderRoomList();
+updateTypeButtons();
+populateHistoryFilter();
 populateExportMonthSelect();
 updatePrevInfo();
 renderMeterList();
