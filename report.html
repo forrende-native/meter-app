@@ -227,6 +227,7 @@
       <button type="button" class="filter-btn" data-building="เพิ่มทรัพย์">เพิ่มทรัพย์</button>
       <button type="button" class="filter-btn" data-building="ปานมณี">ปานมณี</button>
     </div>
+    <button type="button" class="filter-btn" id="refreshBtn" aria-label="รีเฟรชข้อมูล">↻ รีเฟรช</button>
   </div>
   <div class="status" id="statusMsg">กำลังโหลดข้อมูล...</div>
   <div class="table-wrap">
@@ -292,7 +293,9 @@ function setStatus(msg, isError) {
 
 async function loadData() {
   try {
-    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export');
+    setStatus('กำลังโหลดข้อมูล...');
+    // no-store กัน browser cache ข้อมูลเก่าค้าง (export endpoint ไม่มี cache-busting param ในตัวเอง)
+    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export', { cache: 'no-store' });
     const data = await resp.json();
     if (!data || !data.ok || !Array.isArray(data.readings)) {
       throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
@@ -483,14 +486,18 @@ function setupSorting() {
 
 function setupFilters() {
   document.getElementById('searchInput').addEventListener('input', applyFiltersAndRender);
-  document.querySelectorAll('.filter-btn').forEach(btn => {
+  document.querySelectorAll('.filter-btn[data-building]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.filter-btn[data-building]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentBuilding = btn.dataset.building;
       applyFiltersAndRender();
     });
   });
+  const refreshBtn = document.getElementById('refreshBtn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => loadData());
+  }
 }
 
 setupSorting();
