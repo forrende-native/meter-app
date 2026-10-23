@@ -126,6 +126,17 @@ input:focus, select:focus { outline: none; border-color: #1565c0; background: #f
 }
 .calc-preview b { color: #2e7d32; }
 
+.same-day-warning {
+  background: #fff3cd;
+  border: 1px solid #ffcc02;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #7a5c00;
+  display: none;
+}
+
 .list { margin-top: 10px; }
 .list-item {
   display: flex;

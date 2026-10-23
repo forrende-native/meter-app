@@ -50,7 +50,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'history') renderHistory();
     if (btn.dataset.tab === 'meters') renderMeterList();
-    if (btn.dataset.tab === 'readings') { populateBuildingSelect(); populateMeterSelect(); updatePrevInfo(); }
+    if (btn.dataset.tab === 'readings') {
+      populateBuildingSelect();
+      populateMeterSelect();
+      updatePrevInfo();
+      // รีเฟรช cache จาก Sheet ทุกครั้งที่เข้าแท็บนี้ ลดโอกาสเจอเลขเก่า/ค้าง
+      if (typeof refreshSheetLatestCache === 'function') refreshSheetLatestCache();
+    }
     if (btn.dataset.tab === 'export') populateExportMonthSelect();
   });
 });
@@ -166,43 +172,66 @@ document.getElementById('addMeterBtn').addEventListener('click', () => {
 });
 
 // ===== Readings =====
+// ตัดสินใจ (2026-10-23): ไม่ใช้ db.readings (localStorage) หาค่า "เลขครั้งก่อน" อีกต่อไป
+// เพราะจดจากคนละเครื่องแล้วค่าไม่ตรงกัน (เครื่องนี้ไม่มีประวัติเครื่องอื่นเคยจด) ใช้ Google Sheet
+// cache เป็นแหล่งเดียวเสมอ — คืน null ถ้าไม่เคยมีประวัติห้องนี้เลย หรือดึง Sheet ไม่สำเร็จเลย
 function getLastReading(meterId) {
-  const list = db.readings.filter(r => r.meterId === meterId).sort((a, b) => a.date.localeCompare(b.date));
-  const localLast = list.length ? list[list.length - 1] : null;
-
-  // เทียบกับค่าล่าสุดที่ cache มาจาก Google Sheet (กันกรณีเครื่องนี้ไม่เคยมีประวัติห้องนี้ใน
-  // localStorage เลย เช่น ห้องที่ import baseline เข้า Sheet ตรงๆ ไม่ผ่านแอป — ถ้าไม่เช็คตรงนี้
-  // "เลขครั้งก่อน" จะหลุดเป็น 0 ทั้งที่จริงมีเลขก่อนหน้าอยู่ใน Sheet แล้ว)
   const meter = db.meters.find(m => m.id === meterId);
-  const sheetLast = (meter && typeof getSheetLatestReading === 'function')
+  if (!meter) return null;
+  const sheetLast = (typeof getSheetLatestReading === 'function')
     ? getSheetLatestReading(meter.building, meter.name, meter.type)
     : null;
-
-  if (!localLast && !sheetLast) return null;
-  if (!localLast) return { value: sheetLast.value, date: sheetLast.date, source: 'sheet' };
-  if (!sheetLast) return { value: localLast.value, date: localLast.date, source: 'local' };
-
-  // มีทั้งคู่ — เอาอันที่วันที่ใหม่กว่า (ถ้าวันที่เท่ากันให้ถือว่า local แม่นกว่า เพราะเป็นข้อมูลสดจากเครื่องที่กำลังใช้งาน)
-  if (sheetLast.date > localLast.date) {
-    return { value: sheetLast.value, date: sheetLast.date, source: 'sheet' };
-  }
-  return { value: localLast.value, date: localLast.date, source: 'local' };
+  if (!sheetLast) return null;
+  return { value: sheetLast.value, date: sheetLast.date, source: 'sheet' };
 }
 
 function updatePrevInfo() {
   const meterId = document.getElementById('meterSelect').value;
   const prevBox = document.getElementById('prevInfo');
+  const saveBtn = document.getElementById('saveReadingBtn');
   if (!meterId) { prevBox.style.display = 'none'; return; }
+
+  const cacheEverFetched = typeof hasSheetCacheEverSucceeded === 'function' && hasSheetCacheEverSucceeded();
   const last = getLastReading(meterId);
+
   if (last) {
-    const sourceLabel = last.source === 'sheet' ? ' (จาก Google Sheet)' : '';
     prevBox.style.display = 'block';
-    prevBox.innerHTML = `ค่าครั้งก่อน: <b>${last.value}</b> (วันที่ ${last.date})${sourceLabel}`;
+    prevBox.innerHTML = `ค่าครั้งก่อน: <b>${last.value}</b> (วันที่ ${last.date}) (จาก Google Sheet)`;
+    if (saveBtn) saveBtn.disabled = false;
+  } else if (!cacheEverFetched) {
+    // ไม่เคยดึง Sheet สำเร็จเลย (ออฟไลน์/ยังไม่เคยเปิดเน็ต) — ไม่รู้ค่าก่อนหน้าจริงๆ ไม่ให้บันทึก
+    // กันปัญหา prevValue หลุดเป็น 0 แบบเงียบๆ (เกิดซ้ำกับห้อง 409, C2 เพราะข้ามขั้นตอนนี้)
+    prevBox.style.display = 'block';
+    prevBox.innerHTML = 'ไม่สามารถดึงเลขล่าสุดจาก Google Sheet ได้ (ต้องมีเน็ตอย่างน้อยครั้งแรก) — ยังบันทึกไม่ได้';
+    if (saveBtn) saveBtn.disabled = true;
   } else {
+    // ดึง Sheet สำเร็จแล้ว แต่ไม่พบประวัติห้องนี้เลยจริงๆ = มิเตอร์ใหม่ รายการแรก
     prevBox.style.display = 'block';
-    prevBox.innerHTML = 'ยังไม่มีค่าก่อนหน้า (รายการแรก)';
+    prevBox.innerHTML = 'ยังไม่มีค่าก่อนหน้า (รายการแรกของมิเตอร์นี้)';
+    if (saveBtn) saveBtn.disabled = false;
   }
   updateCalcPreview();
+  updateSameDayWarning(meterId);
+}
+
+// เตือนถ้าห้อง+ประเภทนี้มีรายการ "วันเดียวกัน" ใน Sheet อยู่แล้ว (กันคีย์ซ้ำแบบที่เจอกับห้อง C2:
+// คีย์ถูกรอบแรกแล้ว มาคีย์ซ้ำรอบสองในวันเดียวกันด้วยคนละเครื่อง ทำให้มีสองแถวของวันเดียวกัน)
+function updateSameDayWarning(meterId) {
+  const warnBox = document.getElementById('sameDayWarning');
+  if (!warnBox) return;
+  const meter = db.meters.find(m => m.id === meterId);
+  const date = document.getElementById('readingDate').value;
+  if (!meter || !date || typeof getSheetLatestReading !== 'function') {
+    warnBox.style.display = 'none';
+    return;
+  }
+  const last = getSheetLatestReading(meter.building, meter.name, meter.type);
+  if (last && last.date === date) {
+    warnBox.style.display = 'block';
+    warnBox.innerHTML = `⚠ ห้องนี้มีรายการวันที่ ${date} ใน Google Sheet อยู่แล้ว (เลขล่าสุด ${last.value}) กดบันทึกจะเป็นการคีย์ซ้ำ`;
+  } else {
+    warnBox.style.display = 'none';
+  }
 }
 
 function updateCalcPreview() {
@@ -219,6 +248,10 @@ function updateCalcPreview() {
 
 document.getElementById('meterSelect').addEventListener('change', updatePrevInfo);
 document.getElementById('currentReading').addEventListener('input', updateCalcPreview);
+document.getElementById('readingDate').addEventListener('change', () => {
+  const meterId = document.getElementById('meterSelect').value;
+  updateSameDayWarning(meterId);
+});
 
 // default date = today
 document.getElementById('readingDate').value = new Date().toISOString().slice(0, 10);
@@ -233,7 +266,21 @@ document.getElementById('saveReadingBtn').addEventListener('click', () => {
   if (isNaN(value)) { toast('กรุณากรอกเลขมิเตอร์'); return; }
 
   const meter = db.meters.find(m => m.id === meterId);
+  const cacheEverFetched = typeof hasSheetCacheEverSucceeded === 'function' && hasSheetCacheEverSucceeded();
   const last = getLastReading(meterId);
+
+  // บล็อกการบันทึกถ้าไม่เคยดึง Sheet สำเร็จเลย (ไม่รู้เลขก่อนหน้าจริง) — กัน prevValue หลุดเป็น 0
+  if (!last && !cacheEverFetched) {
+    toast('ไม่สามารถดึงเลขล่าสุดจาก Google Sheet ได้ กรุณาต่อเน็ตแล้วลองใหม่ก่อนบันทึก');
+    return;
+  }
+
+  // เตือนก่อนบันทึกถ้าห้อง+ประเภทนี้มีรายการวันเดียวกันใน Sheet อยู่แล้ว (กันคีย์ซ้ำข้ามเครื่อง)
+  if (last && last.date === date) {
+    const ok = confirm(`ห้องนี้มีรายการวันที่ ${date} อยู่แล้วในระบบ (เลขล่าสุด ${last.value})\nต้องการบันทึกซ้ำจริงหรือไม่?`);
+    if (!ok) return;
+  }
+
   const prevVal = last ? last.value : 0;
   const consumed = value - prevVal;
   const rate = meter ? (meter.type === 'water' ? db.config.waterRate : db.config.electricRate) : 0;
@@ -258,6 +305,8 @@ document.getElementById('saveReadingBtn').addEventListener('click', () => {
   }
   document.getElementById('currentReading').value = '';
   document.getElementById('readingNote').value = '';
+  // รีเฟรช cache จาก Sheet ทันทีหลังบันทึก กันคนคีย์ต่อก่อน sync จริงจะเจอเลขเก่า
+  if (typeof refreshSheetLatestCache === 'function') refreshSheetLatestCache();
   updatePrevInfo();
   toast('บันทึกแล้ว ✓');
 });

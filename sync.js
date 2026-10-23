@@ -100,10 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== ดึงเลขล่าสุดต่อห้อง+ประเภท จาก Google Sheet มา cache ไว้ =====
-// แก้ปัญหา: เครื่อง/อุปกรณ์ที่ไม่เคยมีประวัติห้องนั้นใน localStorage (เช่น ห้องที่ import
-// baseline เข้า Sheet ตรงๆ ไม่ผ่านแอป) จะไม่มีทาง "เลขครั้งก่อน" หลุดเป็น 0 อีกต่อไป —
-// เพราะ Sheet มีประวัติครบกว่าเครื่องเดียวเสมอ (ทุกเครื่อง sync เข้าที่เดียวกัน)
+// ตัดสินใจ (2026-10-23): ไม่ใช้ localStorage เป็นแหล่งอ้างอิง "เลขครั้งก่อน" อีกต่อไปเลย
+// เพราะถ้าจดจากคนละเครื่อง/อุปกรณ์ แต่ละเครื่องมี localStorage แยกกัน ทำให้เครื่องที่ไม่เคยจด
+// ห้องนั้นมาก่อนหาค่าก่อนหน้าไม่เจอ แล้วหลุดเป็น 0 (เกิดซ้ำหลายครั้ง เช่น ห้อง 409, ห้อง C2)
+// ตอนนี้ Google Sheet เป็นแหล่งความจริงหนึ่งเดียวสำหรับ "เลขครั้งก่อน" ทุกเครื่องเห็นค่าตรงกันเสมอ
 const SHEET_LATEST_CACHE_KEY = 'meterapp_sheet_latest_cache_v1';
+const SHEET_LATEST_CACHE_META_KEY = 'meterapp_sheet_latest_cache_meta_v1';
 
 function sheetLatestKey(building, meterName, type) {
   return (building || '') + '||' + (meterName || '') + '||' + type;
@@ -120,21 +122,42 @@ function loadSheetLatestCache() {
 
 function saveSheetLatestCache(map) {
   localStorage.setItem(SHEET_LATEST_CACHE_KEY, JSON.stringify(map));
+  localStorage.setItem(SHEET_LATEST_CACHE_META_KEY, JSON.stringify({ fetchedAt: new Date().toISOString() }));
+}
+
+// บอกว่าเคยดึงจาก Sheet สำเร็จอย่างน้อยหนึ่งครั้งไหม (ใช้ตัดสินว่าจะยอมให้บันทึกได้หรือต้องบล็อก)
+function hasSheetCacheEverSucceeded() {
+  try {
+    const raw = localStorage.getItem(SHEET_LATEST_CACHE_META_KEY);
+    return !!(raw && JSON.parse(raw).fetchedAt);
+  } catch (e) {
+    return false;
+  }
+}
+
+function getSheetCacheFetchedAt() {
+  try {
+    const raw = localStorage.getItem(SHEET_LATEST_CACHE_META_KEY);
+    return raw ? JSON.parse(raw).fetchedAt : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 // ดึง export ทั้งหมดจาก Sheet แล้วสรุปเหลือ "รายการล่าสุดต่อห้อง+ประเภท" เก็บเป็น cache
-// เรียกตอนเปิดแอป/แท็บบันทึก และหลัง sync สำเร็จ ไม่เรียกถี่เกินไป (fetch เดียวจบ ไม่ใช่ polling)
+// เรียกตอนเปิดแอป/แท็บบันทึก/online/หลัง sync สำเร็จ — ยิ่งเรียกบ่อยยิ่งลดโอกาสคีย์ซ้ำ/เลขเพี้ยน
 let sheetLatestFetchInFlight = false;
 async function refreshSheetLatestCache() {
-  if (!SHEET_WEBAPP_URL) return;
-  if (sheetLatestFetchInFlight) return;
-  if (!navigator.onLine) return;
+  if (!SHEET_WEBAPP_URL) return false;
+  if (sheetLatestFetchInFlight) return false;
+  if (!navigator.onLine) return false;
   sheetLatestFetchInFlight = true;
+  let success = false;
   try {
-    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export');
-    if (!resp.ok) return;
+    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export', { cache: 'no-store' });
+    if (!resp.ok) return false;
     const data = await resp.json();
-    if (!data || !data.ok || !Array.isArray(data.readings)) return;
+    if (!data || !data.ok || !Array.isArray(data.readings)) return false;
 
     const map = {};
     data.readings.forEach((r) => {
@@ -146,12 +169,14 @@ async function refreshSheetLatestCache() {
       }
     });
     saveSheetLatestCache(map);
+    success = true;
     if (typeof updatePrevInfo === 'function') updatePrevInfo();
   } catch (err) {
-    // ออฟไลน์/ดึงไม่สำเร็จ — ใช้ cache เดิมที่มีอยู่ต่อไป
+    // ออฟไลน์/ดึงไม่สำเร็จ — ใช้ cache เดิมที่มีอยู่ต่อไป (ถ้ามี)
   } finally {
     sheetLatestFetchInFlight = false;
   }
+  return success;
 }
 
 // คืนค่าล่าสุดของห้อง+ประเภทนี้จาก cache ของ Sheet (หรือ null ถ้าไม่เคยมี)

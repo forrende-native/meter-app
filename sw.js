@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meterapp-v12';
+const CACHE_NAME = 'meterapp-v13';
 const ASSETS = [
   './',
   './index.html',
@@ -29,6 +29,11 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  // ข้าม cache สำหรับ request ข้ามโดเมน (เช่น Google Apps Script API) เสมอ —
+  // ถ้าปล่อยให้ cache-first ครอบด้วย จะได้ข้อมูลเก่าค้างตลอดไป (export endpoint ไม่มี
+  // cache-busting param) ทำให้ refreshSheetLatestCache() ไม่เคยเห็นข้อมูลใหม่จริง
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
