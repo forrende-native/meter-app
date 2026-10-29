@@ -364,11 +364,32 @@
   @media print {
     body * { visibility: hidden; }
     #previewContent, #previewContent * { visibility: visible; }
+    /* ต้องรีเซ็ต parent (.preview-overlay/.preview-box) ด้วย ไม่งั้น position:fixed +
+       overflow:auto ของ overlay จะตีกรอบพื้นที่พิมพ์แค่เท่าจอเดียว ทำให้ตารางยาวถูกบีบ
+       ให้พอดี 1 หน้าแทนที่จะไหลต่อหน้า 2-3 ตามจริง (เคยเกิดบั๊กนี้จริง — ปริ้นแล้วได้แค่ 1
+       หน้าทั้งที่มีห้องเป็นสิบ ๆ แถว) */
+    html, body { height: auto !important; overflow: visible !important; }
+    .preview-overlay {
+      position: static !important;
+      inset: auto !important;
+      overflow: visible !important;
+      background: none !important;
+      padding: 0 !important;
+      display: block !important;
+    }
+    .preview-box {
+      max-width: none !important;
+      width: auto !important;
+      padding: 0 !important;
+    }
     #previewContent {
-      position: absolute;
-      left: 0; top: 0; width: 100%;
+      position: static !important;
+      width: 100%;
       border: none; max-height: none; overflow: visible;
     }
+    #previewContent table { page-break-inside: auto; }
+    #previewContent tr { page-break-inside: avoid; page-break-after: auto; }
+    #previewContent thead { display: table-header-group; }
   }
 </style>
 </head>
