@@ -524,6 +524,10 @@ function buildReport(readings) {
   }
 
   // Pivot: 1 แถวต่อ (ตึก + ห้อง)
+  // หมายเหตุสำคัญ: ถ้าห้องเดียวกันถูกจดมิเตอร์มากกว่า 1 ครั้งในเดือนเดียวกัน (เช่น จด
+  // กลางเดือนแล้วจดซ้ำปลายเดือน) ต้องใช้แค่ "ครั้งล่าสุด" ของแต่ละประเภทเท่านั้น ห้าม
+  // บวกหน่วย/ค่าใช้จ่ายของหลายรอบรวมกัน ไม่งั้นค่าที่แสดงจะไม่ตรงกับ หน่วย×อัตรา
+  // (เคยเกิดบั๊กนี้จริง — ห้อง A3 ไฟขึ้น 341 หน่วย เพราะบวก 167+174 ของ 2 รอบในเดือนเดียวกัน)
   const map = new Map();
   cycleReadings.forEach(r => {
     const key = (r.building || '') + '||' + (r.meterName || '');
@@ -535,25 +539,32 @@ function buildReport(readings) {
         waterCurr: null,
         waterUnits: 0,
         waterCost: 0,
+        waterDate: '',
         elecPrev: null,
         elecCurr: null,
         elecUnits: 0,
         elecCost: 0,
+        elecDate: '',
       });
     }
     const row = map.get(key);
     const units = Number(r.consumed) || 0;
     const cost = Number(r.cost) || 0;
+    const rDate = r.date || '';
     if (r.type === 'water') {
-      row.waterUnits += units;
-      row.waterCost += cost;
+      if (rDate < row.waterDate) return; // มีรอบที่ใหม่กว่าอยู่แล้ว ข้ามรอบเก่า
+      row.waterUnits = units;
+      row.waterCost = cost;
       row.waterPrev = r.prevValue;
       row.waterCurr = r.value;
+      row.waterDate = rDate;
     } else {
-      row.elecUnits += units;
-      row.elecCost += cost;
+      if (rDate < row.elecDate) return;
+      row.elecUnits = units;
+      row.elecCost = cost;
       row.elecPrev = r.prevValue;
       row.elecCurr = r.value;
+      row.elecDate = rDate;
     }
   });
 
