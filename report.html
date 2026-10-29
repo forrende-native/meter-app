@@ -462,6 +462,9 @@ const ELECTRIC_WARNING_UNITS = 150;
 
 const THAI_MONTHS = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
   'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+// ตัวย่อเดือนไทย ใช้โชว์ "รอบเรียกเก็บ" (เดือนถัดจากเดือนที่จดจริง เพราะบิลออกเดือนถัดไปเสมอ)
+const THAI_MONTHS_ABBR = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+  'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
 const numFmt = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 });
 
@@ -534,13 +537,17 @@ function buildReport(readings) {
     ? valid.filter(r => (r.date || '').slice(0, 7) === latestMonth)
     : valid;
 
-  // อัปเดตหัวเรื่องเล็กด้านบนตามเดือนจริงจากข้อมูล
+  // อัปเดตหัวเรื่องเล็กด้านบนตามเดือนจริงจากข้อมูล — แสดงเป็น "รอบเรียกเก็บ" คือเดือน
+  // ถัดจากเดือนที่จดมิเตอร์จริงเสมอ (เช่น จดเดือน ต.ค. จะเรียกเก็บบิลเดือน พ.ย.)
   if (latestMonth) {
     const parts = latestMonth.split('-');
     const y = parseInt(parts[0], 10);
     const mo = parseInt(parts[1], 10);
-    const label = (THAI_MONTHS[mo] || '') + ' ' + (y + 543);
-    document.getElementById('eyebrow').textContent = 'มิเตอร์น้ำ-ไฟ · รอบจด' + label;
+    let billMo = mo + 1;
+    let billY = y;
+    if (billMo > 12) { billMo = 1; billY += 1; }
+    const label = (THAI_MONTHS_ABBR[billMo] || '') + ' ' + (billY + 543);
+    document.getElementById('eyebrow').textContent = 'มิเตอร์น้ำ-ไฟ · รอบเรียกเก็บ ' + label;
   } else {
     document.getElementById('eyebrow').textContent = 'มิเตอร์น้ำ-ไฟ';
   }
