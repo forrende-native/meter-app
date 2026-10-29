@@ -362,26 +362,27 @@
   #previewContent th.num, #previewContent td.num { text-align: right; font-variant-numeric: tabular-nums; }
   #previewContent h3 { margin: 0 0 10px; font-size: 16px; }
   @media print {
-    body * { visibility: hidden; }
-    #previewContent, #previewContent * { visibility: visible; }
-    /* ต้องรีเซ็ต parent (.preview-overlay/.preview-box) ด้วย ไม่งั้น position:fixed +
-       overflow:auto ของ overlay จะตีกรอบพื้นที่พิมพ์แค่เท่าจอเดียว ทำให้ตารางยาวถูกบีบ
-       ให้พอดี 1 หน้าแทนที่จะไหลต่อหน้า 2-3 ตามจริง (เคยเกิดบั๊กนี้จริง — ปริ้นแล้วได้แค่ 1
-       หน้าทั้งที่มีห้องเป็นสิบ ๆ แถว) */
-    html, body { height: auto !important; overflow: visible !important; }
+    /* ใช้ display:none ซ่อนทุกอย่างนอก #previewContent ไม่ใช่ visibility:hidden —
+       visibility:hidden ยังกินพื้นที่ใน layout อยู่ (แค่มองไม่เห็น) ทำให้เกิดช่องว่าง
+       เปล่าๆ ด้านบนหน้ากระดาษเท่าความสูงของ .card เดิม (เคยเกิดบั๊กนี้จริง) ส่วน
+       position:fixed ของ overlay ก็ใช้ไม่ได้เพราะเบราว์เซอร์ส่วนใหญ่โชว์ element แบบ fixed
+       แค่หน้าแรกตอนพิมพ์ ทำให้ตารางยาวถูกตัดเหลือหน้าเดียว (บั๊กที่แก้ไปรอบก่อน) —
+       display:none แก้ได้ทั้งสองปัญหาพร้อมกัน: ไม่กินพื้นที่ และไหลหลายหน้าได้ตามจริง */
+    body > *:not(#previewOverlay) { display: none !important; }
     .preview-overlay {
+      display: block !important;
       position: static !important;
       inset: auto !important;
       overflow: visible !important;
       background: none !important;
       padding: 0 !important;
-      display: block !important;
     }
     .preview-box {
       max-width: none !important;
       width: auto !important;
       padding: 0 !important;
     }
+    .preview-toolbar { display: none !important; }
     #previewContent {
       position: static !important;
       width: 100%;
