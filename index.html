@@ -115,6 +115,12 @@
       <h2>รายการมิเตอร์/ห้อง</h2>
       <div id="meterList" class="list"></div>
     </div>
+    <div class="card">
+      <h2>QR ประจำห้อง (สำหรับสแกน)</h2>
+      <p class="hint">พิมพ์/แปะ QR ไว้ที่ห้อง แล้วสแกนด้วยปุ่ม 📷 มุมจอ เพื่อเลือกห้องให้อัตโนมัติตอนจดมิเตอร์</p>
+      <button id="printAllQRBtn" class="btn-secondary">🖨 พิมพ์ QR ทั้งหมด</button>
+      <div id="roomQRList" class="qr-room-list"></div>
+    </div>
   </section>
 
   <!-- TAB: ประวัติ -->
@@ -159,11 +165,25 @@
 
 <div id="toast" class="toast"></div>
 
+<button id="qrFab" class="qr-fab" title="สแกน QR ห้อง">📷</button>
+
+<div id="qrScanModal" class="qr-scan-modal">
+  <div class="qr-scan-box">
+    <video id="qrScanVideo" autoplay muted playsinline></video>
+    <canvas id="qrScanCanvas" style="display:none;"></canvas>
+    <div id="qrScanStatus" class="qr-scan-status">กำลังเปิดกล้อง...</div>
+    <button id="qrScanCancelBtn" class="btn-secondary">ยกเลิก</button>
+  </div>
+</div>
+
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="xlsx.full.min.js"></script>
 <script src="seed_meters.js"></script>
 <script src="sync.js"></script>
 <script src="app.js"></script>
 <script src="drive.js"></script>
+<script src="jsQR.js"></script>
+<script src="qrcode.min.js"></script>
+<script src="qr.js"></script>
 </body>
 </html>
