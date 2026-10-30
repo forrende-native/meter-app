@@ -354,7 +354,7 @@ document.getElementById('readingDate').addEventListener('change', () => {
 // default date = today
 document.getElementById('readingDate').value = new Date().toISOString().slice(0, 10);
 
-document.getElementById('saveReadingBtn').addEventListener('click', () => {
+document.getElementById('saveReadingBtn').addEventListener('click', async () => {
   const meterId = selectedMeterId;
   const date = document.getElementById('readingDate').value;
   const value = parseFloat(document.getElementById('currentReading').value);
@@ -398,15 +398,31 @@ document.getElementById('saveReadingBtn').addEventListener('click', () => {
   });
   saveDB(db);
   const savedReading = db.readings[db.readings.length - 1];
+
+  const saveBtn = document.getElementById('saveReadingBtn');
+  saveBtn.disabled = true;
+  const prevLabel = saveBtn.textContent;
+  saveBtn.textContent = 'กำลังส่งขึ้น Google Sheet...';
+
+  let syncedOk = false;
   if (typeof queueReadingForSync === 'function') {
-    queueReadingForSync(savedReading, meter);
+    syncedOk = await queueReadingForSync(savedReading, meter);
   }
+
+  saveBtn.textContent = prevLabel;
+  saveBtn.disabled = false;
+
   document.getElementById('currentReading').value = '';
   document.getElementById('readingNote').value = '';
   // รีเฟรช cache จาก Sheet ทันทีหลังบันทึก กันคนคีย์ต่อก่อน sync จริงจะเจอเลขเก่า
-  if (typeof refreshSheetLatestCache === 'function') refreshSheetLatestCache();
+  if (typeof refreshSheetLatestCache === 'function') await refreshSheetLatestCache();
   updatePrevInfo();
-  toast('บันทึกแล้ว ✓');
+
+  if (syncedOk) {
+    toast('บันทึกขึ้น Google Sheet แล้ว ✓');
+  } else {
+    toast('บันทึกในเครื่องแล้ว แต่ยังไม่มีเน็ต/ส่งขึ้น Sheet ไม่สำเร็จ — จะลองส่งอัตโนมัติอีกครั้งเมื่อมีเน็ต');
+  }
 });
 
 // ===== History =====

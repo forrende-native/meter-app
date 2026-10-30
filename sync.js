@@ -23,7 +23,7 @@ function saveSyncQueue(queue) {
 }
 
 function queueReadingForSync(reading, meter) {
-  if (!SHEET_WEBAPP_URL) return; // sync ปิดอยู่
+  if (!SHEET_WEBAPP_URL) return Promise.resolve(false); // sync ปิดอยู่
   const queue = loadSyncQueue();
   queue.push({
     readingId: reading.id,
@@ -39,19 +39,22 @@ function queueReadingForSync(reading, meter) {
     note: reading.note || '',
   });
   saveSyncQueue(queue);
-  trySyncNow();
+  // รอผลจริงจากการยิงขึ้น Sheet ก่อน (ไม่ fire-and-forget) เพื่อบอกผู้ใช้ได้ทันทีว่าขึ้น Sheet แล้วจริงหรือยัง
+  // ยังเข้าคิวไว้เหมือนเดิมเผื่อออฟไลน์/ยิงไม่สำเร็จ — trySyncNow จะลองใหม่อัตโนมัติทีหลัง
+  return trySyncNow();
 }
 
 let syncInFlight = false;
 
 async function trySyncNow() {
-  if (!SHEET_WEBAPP_URL) return;
-  if (syncInFlight) return;
-  if (!navigator.onLine) return;
+  if (!SHEET_WEBAPP_URL) return false;
+  if (syncInFlight) return false;
+  if (!navigator.onLine) return false;
   const queue = loadSyncQueue();
-  if (queue.length === 0) return;
+  if (queue.length === 0) return true; // ไม่มีอะไรค้าง ถือว่า "ขึ้น Sheet แล้ว" อยู่แล้ว
 
   syncInFlight = true;
+  let success = false;
   try {
     const resp = await fetch(SHEET_WEBAPP_URL + '?token=' + encodeURIComponent(SHEET_SYNC_TOKEN), {
       method: 'POST',
@@ -63,9 +66,7 @@ async function trySyncNow() {
       const data = await resp.json().catch(() => null);
       if (data && data.ok) {
         saveSyncQueue([]); // ส่งสำเร็จ ล้างคิว
-        if (typeof toast === 'function' && queue.length > 0) {
-          toast(`ซิงก์ขึ้น Google Sheet แล้ว (${queue.length} รายการ)`);
-        }
+        success = true;
         refreshSheetLatestCache(); // อัปเดต cache เลขล่าสุดให้ตรงกับ Sheet หลัง sync สำเร็จ
       }
     }
@@ -75,6 +76,7 @@ async function trySyncNow() {
     syncInFlight = false;
     updateSyncBadge();
   }
+  return success;
 }
 
 function updateSyncBadge() {
