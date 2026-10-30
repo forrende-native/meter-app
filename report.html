@@ -456,6 +456,8 @@
 // ===== ตั้งค่า =====
 // URL Apps Script Web App เดียวกับที่ sync.js ใช้ (รองรับ GET ?action=export)
 const SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyCBp1Si7VkhekLIH2t1PAe4UpXelHzs3YTgyUdE555slItPnVg4igMiI-rckWd4H9_/exec';
+// Shared-secret token ต้องตรงกับ SHARED_TOKEN ใน apps-script-project/Code.js
+const SHEET_SYNC_TOKEN = 'Bh2Aql0PGVci1Mga9dxh9NfzSB0tBVkH';
 
 // หน่วยไฟต่อเดือนที่ถือว่าสูงผิดปกติ — ตัวเลขนี้แก้ได้ง่ายที่เดียว
 const ELECTRIC_WARNING_UNITS = 150;
@@ -511,7 +513,7 @@ async function loadData() {
   try {
     setStatus('กำลังโหลดข้อมูล...');
     // no-store กัน browser cache ข้อมูลเก่าค้าง (export endpoint ไม่มี cache-busting param ในตัวเอง)
-    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export', { cache: 'no-store' });
+    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export&token=' + encodeURIComponent(SHEET_SYNC_TOKEN), { cache: 'no-store' });
     const data = await resp.json();
     if (!data || !data.ok || !Array.isArray(data.readings)) {
       throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');

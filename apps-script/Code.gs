@@ -18,6 +18,13 @@
 var SHEET_NAME = 'Readings';
 var SPREADSHEET_ID = ''; // ใส่ ID ของ Sheet ถ้ารันนอกบริบท bound script (ไม่บังคับถ้า script ผูกกับ Sheet อยู่แล้ว)
 
+// Shared-secret token กันคนนอกที่ไม่รู้ token ยิง POST/GET เข้า endpoint นี้ได้
+var SHARED_TOKEN = 'Bh2Aql0PGVci1Mga9dxh9NfzSB0tBVkH';
+
+function isAuthorized_(token) {
+  return token === SHARED_TOKEN;
+}
+
 function getSheet_() {
   var ss = SPREADSHEET_ID
     ? SpreadsheetApp.openById(SPREADSHEET_ID)
@@ -42,6 +49,10 @@ function getSheet_() {
 function doPost(e) {
   var result = { ok: false };
   try {
+    if (!isAuthorized_(e && e.parameter && e.parameter.token)) {
+      result.error = 'unauthorized';
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
     var body = JSON.parse(e.postData.contents);
     var sheet = getSheet_();
 
@@ -91,6 +102,11 @@ function doPost(e) {
 // ใช้ทดสอบว่า Web App ทำงานอยู่ (เปิด URL ตรงๆ ใน browser จะเจอ endpoint นี้)
 // รองรับ ?action=export เพื่อดึงข้อมูลทั้งหมดกลับเป็น JSON (ใช้โดยระบบภายนอก เช่น dorm)
 function doGet(e) {
+  if (!isAuthorized_(e && e.parameter && e.parameter.token)) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: 'unauthorized' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   if (e && e.parameter && e.parameter.action === 'export') {
     return exportReadingsAsJson_();
   }

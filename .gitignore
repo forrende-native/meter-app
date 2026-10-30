@@ -6,3 +6,7 @@ export_meters_import.py
 server.log
 *.pyc
 client_secret_*.json
+seed_meters.js
+dorm_import_sheet.js
+test_data_backup.json
+meter-backup-with-p1.json

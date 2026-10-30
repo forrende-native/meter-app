@@ -18,6 +18,15 @@
 var SHEET_NAME = 'Readings';
 var SPREADSHEET_ID = ''; // ใส่ ID ของ Sheet ถ้ารันนอกบริบท bound script (ไม่บังคับถ้า script ผูกกับ Sheet อยู่แล้ว)
 
+// Shared-secret token กันคนนอกที่ไม่รู้ token ยิง POST/GET เข้า endpoint นี้ได้
+// (ก่อนหน้านี้ endpoint เปิด public ล้วน ใครมี URL ก็ยิงได้ — ตอนนี้ต้องแนบ token ทุกคำขอ)
+// ต้องตรงกับค่าใน sync.js/report.html (meter-app) และ app.js (dorm) ทุกจุดที่เรียก endpoint นี้
+var SHARED_TOKEN = 'Bh2Aql0PGVci1Mga9dxh9NfzSB0tBVkH';
+
+function isAuthorized_(token) {
+  return token === SHARED_TOKEN;
+}
+
 function getSheet_() {
   var ss = SPREADSHEET_ID
     ? SpreadsheetApp.openById(SPREADSHEET_ID)
@@ -42,7 +51,21 @@ function getSheet_() {
 function doPost(e) {
   var result = { ok: false };
   try {
+    if (!isAuthorized_(e && e.parameter && e.parameter.token)) {
+      result.error = 'unauthorized';
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var body = JSON.parse(e.postData.contents);
+
+    // รองรับ action: 'update' สำหรับแก้ไขแถวเดิมที่จดผิด (แทนที่จะ append แถวใหม่ซ้ำ)
+    // ส่งมาเป็น { action: 'update', building, meterName, type, date, prevValue, newValue, rate }
+    // ค้นแถวที่ตรง building+meterName+type+date+prevValue (เจาะจงที่สุดกันแก้ผิดแถว) แล้วคำนวณ
+    // หน่วย/ค่าใช้จ่ายใหม่จากเลขครั้งนี้ที่แก้ (ใช้สูตรเดียวกับ onEdit_)
+    if (body && body.action === 'update') {
+      return updateReading_(body);
+    }
+
     var sheet = getSheet_();
 
     // รองรับทั้งส่งทีละรายการ (reading เดี่ยว) และส่งเป็น array (batch sync)
@@ -88,9 +111,69 @@ function doPost(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// แก้ไขเลข "ครั้งนี้" ของแถวที่จดผิดไปแล้ว (ไม่ใช่เพิ่มแถวใหม่) — ค้นจาก
+// building+meterName+type+date+prevValue (เจาะจงพอจะไม่โดนแถวอื่นผิดตัว)
+// แล้วคำนวณหน่วย/ค่าใช้จ่ายใหม่ด้วยสูตรเดียวกับ onEdit (consumed = new - prev, cost = max(minimum, consumed*rate))
+function updateReading_(body) {
+  var result = { ok: false };
+  try {
+    var sheet = getSheet_();
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      result.error = 'ไม่มีข้อมูลในชีต';
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+    var typeLabel = body.type === 'water' ? 'น้ำ' : 'ไฟ';
+    var values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+    var foundRow = -1;
+    for (var i = 0; i < values.length; i++) {
+      var row = values[i];
+      if (
+        String(row[1]) === String(body.building) &&
+        String(row[2]) === String(body.meterName) &&
+        String(row[3]) === typeLabel &&
+        normalizeDate_(row[4]) === body.date &&
+        Number(row[5]) === Number(body.prevValue)
+      ) {
+        foundRow = i + 2; // +2: offset ของ getRange(2,...) + 1-index
+        break;
+      }
+    }
+    if (foundRow === -1) {
+      result.error = 'ไม่พบแถวที่ตรงเงื่อนไข (building/meterName/type/date/prevValue)';
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var rate = body.rate != null ? Number(body.rate) : Number(sheet.getRange(foundRow, 9).getValue());
+    var newValue = Number(body.newValue);
+    var consumed = newValue - Number(body.prevValue);
+    var minimum = body.type === 'water' ? WATER_MINIMUM_BAHT : ELECTRIC_MINIMUM_BAHT;
+    var cost = Math.max(minimum, consumed * rate);
+
+    sheet.getRange(foundRow, 7).setValue(newValue); // เลขครั้งนี้
+    sheet.getRange(foundRow, 8).setValue(consumed);  // หน่วยที่ใช้
+    sheet.getRange(foundRow, 10).setValue(cost);     // ค่าใช้จ่าย
+
+    result.ok = true;
+    result.row = foundRow;
+    result.consumed = consumed;
+    result.cost = cost;
+  } catch (err) {
+    result.ok = false;
+    result.error = String(err);
+  }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
 // ใช้ทดสอบว่า Web App ทำงานอยู่ (เปิด URL ตรงๆ ใน browser จะเจอ endpoint นี้)
 // รองรับ ?action=export เพื่อดึงข้อมูลทั้งหมดกลับเป็น JSON (ใช้โดยระบบภายนอก เช่น dorm)
+// ทุกคำขอต้องแนบ ?token=... ที่ตรงกับ SHARED_TOKEN ไม่งั้นปฏิเสธ
 function doGet(e) {
+  if (!isAuthorized_(e && e.parameter && e.parameter.token)) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: 'unauthorized' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   if (e && e.parameter && e.parameter.action === 'export') {
     return exportReadingsAsJson_();
   }

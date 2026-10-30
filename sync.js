@@ -2,6 +2,9 @@
 // ตั้งค่า URL ของ Apps Script Web App ที่ deploy แล้ว (ลงท้ายด้วย /exec)
 // ปล่อยว่างไว้ = ปิดการ sync (แอปยังใช้งานออฟไลน์ได้ปกติ)
 const SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyCBp1Si7VkhekLIH2t1PAe4UpXelHzs3YTgyUdE555slItPnVg4igMiI-rckWd4H9_/exec';
+// Shared-secret token ต้องตรงกับ SHARED_TOKEN ใน apps-script-project/Code.js ไม่งั้น endpoint ปฏิเสธ
+// (กันคนอื่นที่เจอ URL endpoint นี้จาก view-source ยิงข้อมูลปลอมเข้า Sheet หรือดึงข้อมูลออกไปได้)
+const SHEET_SYNC_TOKEN = 'Bh2Aql0PGVci1Mga9dxh9NfzSB0tBVkH';
 
 const SYNC_QUEUE_KEY = 'meterapp_sync_queue_v1';
 
@@ -50,7 +53,7 @@ async function trySyncNow() {
 
   syncInFlight = true;
   try {
-    const resp = await fetch(SHEET_WEBAPP_URL, {
+    const resp = await fetch(SHEET_WEBAPP_URL + '?token=' + encodeURIComponent(SHEET_SYNC_TOKEN), {
       method: 'POST',
       // ใช้ text/plain เพื่อเลี่ยง CORS preflight (Apps Script Web App ไม่รองรับ OPTIONS)
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -154,7 +157,7 @@ async function refreshSheetLatestCache() {
   sheetLatestFetchInFlight = true;
   let success = false;
   try {
-    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export', { cache: 'no-store' });
+    const resp = await fetch(SHEET_WEBAPP_URL + '?action=export&token=' + encodeURIComponent(SHEET_SYNC_TOKEN), { cache: 'no-store' });
     if (!resp.ok) return false;
     const data = await resp.json();
     if (!data || !data.ok || !Array.isArray(data.readings)) return false;
