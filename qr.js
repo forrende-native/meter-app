@@ -1,40 +1,55 @@
-// ===== QR: generate per-room QR + scan QR to jump to reading form =====
-// Encoding: QR text = "meterapp:room:" + encodeURIComponent(JSON.stringify({b: building, n: name}))
-const QR_PREFIX = 'meterapp:room:';
+// ===== QR: generate per-meter QR (แยกน้ำ/ไฟ) + scan QR to jump straight to reading form =====
+// Encoding: QR text = "meterapp:meter:" + encodeURIComponent(JSON.stringify({b: building, n: name, t: type}))
+const QR_PREFIX = 'meterapp:meter:';
 
-function qrPayloadForRoom(building, name) {
-  return QR_PREFIX + encodeURIComponent(JSON.stringify({ b: building || '', n: name }));
+function qrPayloadForMeter(building, name, type) {
+  return QR_PREFIX + encodeURIComponent(JSON.stringify({ b: building || '', n: name, t: type }));
 }
 
 function parseQRPayload(text) {
   if (!text || text.indexOf(QR_PREFIX) !== 0) return null;
   try {
     const data = JSON.parse(decodeURIComponent(text.slice(QR_PREFIX.length)));
-    if (typeof data.n !== 'string') return null;
-    return { building: data.b || '', name: data.n };
+    if (typeof data.n !== 'string' || (data.t !== 'water' && data.t !== 'electric')) return null;
+    return { building: data.b || '', name: data.n, type: data.t };
   } catch (e) {
     return null;
   }
 }
 
-// ===== Render QR list in tab มิเตอร์/ห้อง =====
+// รวมมิเตอร์ทั้งหมด (ตึก+ห้อง+ประเภท) เป็น list แบน เพื่อ generate QR ทีละใบต่อมิเตอร์
+function getAllMetersFlat() {
+  return [...db.meters]
+    .sort((a, b) =>
+      (a.building || '').localeCompare(b.building || '', 'th') ||
+      a.name.localeCompare(b.name, 'th', { numeric: true }) ||
+      (a.type === b.type ? 0 : a.type === 'water' ? -1 : 1)
+    );
+}
+
+function meterTypeLabel(type) {
+  return type === 'water' ? 'น้ำ' : 'ไฟ';
+}
+function meterTypeIcon(type) {
+  return type === 'water' ? '💧' : '⚡';
+}
+
+// ===== Render QR list in tab มิเตอร์/ห้อง (ใบละ 1 มิเตอร์ น้ำ/ไฟ แยกกัน) =====
 function renderRoomQRList() {
   const wrap = document.getElementById('roomQRList');
-  if (!wrap || typeof getRoomNamesForBuilding !== 'function') return;
+  if (!wrap) return;
   wrap.innerHTML = '';
-  const rooms = getRoomNamesForBuilding('ทั้งหมด').sort((a, b) =>
-    a.name.localeCompare(b.name, 'th', { numeric: true })
-  );
-  if (rooms.length === 0) {
-    wrap.innerHTML = '<p class="hint">ยังไม่มีห้อง</p>';
+  const meters = getAllMetersFlat();
+  if (meters.length === 0) {
+    wrap.innerHTML = '<p class="hint">ยังไม่มีมิเตอร์</p>';
     return;
   }
-  rooms.forEach(r => {
+  meters.forEach(m => {
     const item = document.createElement('div');
     item.className = 'qr-room-item';
     const label = document.createElement('div');
     label.className = 'qr-room-label';
-    label.innerHTML = `${escapeHtml(r.building)}<br><b>${escapeHtml(r.name)}</b>`;
+    label.innerHTML = `${escapeHtml(m.building)}<br><b>${escapeHtml(m.name)}</b><br>${meterTypeIcon(m.type)} ${meterTypeLabel(m.type)}`;
     const qrBox = document.createElement('div');
     qrBox.className = 'qr-room-code';
     const dlBtn = document.createElement('button');
@@ -47,7 +62,7 @@ function renderRoomQRList() {
     wrap.appendChild(item);
 
     new QRCode(qrBox, {
-      text: qrPayloadForRoom(r.building, r.name),
+      text: qrPayloadForMeter(m.building, m.name, m.type),
       width: 120,
       height: 120,
       correctLevel: QRCode.CorrectLevel.M,
@@ -60,21 +75,19 @@ function renderRoomQRList() {
       if (!dataUrl) return;
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = `qr-${(r.building || '')}-${r.name}.png`.replace(/\s+/g, '_');
+      a.download = `qr-${(m.building || '')}-${m.name}-${m.type}.png`.replace(/\s+/g, '_');
       a.click();
     });
   });
 }
 
-// ===== พิมพ์ QR ทั้งหมด (เปิดหน้าต่างใหม่ พร้อมเลย์เอาต์สำหรับพิมพ์) =====
+// ===== พิมพ์ QR ทั้งหมด (ใบละ 1 มิเตอร์ น้ำ/ไฟ แยกกัน เปิดหน้าต่างใหม่พร้อมเลย์เอาต์สำหรับพิมพ์) =====
 document.getElementById('printAllQRBtn').addEventListener('click', () => {
-  const rooms = getRoomNamesForBuilding('ทั้งหมด').sort((a, b) =>
-    a.name.localeCompare(b.name, 'th', { numeric: true })
-  );
-  if (rooms.length === 0) { toast('ยังไม่มีห้องให้พิมพ์ QR'); return; }
+  const meters = getAllMetersFlat();
+  if (meters.length === 0) { toast('ยังไม่มีมิเตอร์ให้พิมพ์ QR'); return; }
 
   const win = window.open('', '_blank');
-  win.document.write('<html><head><title>พิมพ์ QR ห้อง</title><meta charset="utf-8"></head><body></body></html>');
+  win.document.write('<html><head><title>พิมพ์ QR มิเตอร์</title><meta charset="utf-8"></head><body></body></html>');
   win.document.close();
   const style = win.document.createElement('style');
   style.textContent = `
@@ -83,6 +96,7 @@ document.getElementById('printAllQRBtn').addEventListener('click', () => {
     .cell { width: 160px; text-align: center; border: 1px dashed #999; padding: 10px; page-break-inside: avoid; }
     .cell .bld { font-size: 11px; color: #555; }
     .cell .rm { font-size: 15px; font-weight: bold; margin-top: 4px; }
+    .cell .tp { font-size: 13px; margin-top: 2px; }
     .cell canvas, .cell img { margin-top: 6px; }
   `;
   win.document.head.appendChild(style);
@@ -90,22 +104,26 @@ document.getElementById('printAllQRBtn').addEventListener('click', () => {
   grid.className = 'grid';
   win.document.body.appendChild(grid);
 
-  rooms.forEach(r => {
+  meters.forEach(m => {
     const cell = win.document.createElement('div');
     cell.className = 'cell';
     const bld = win.document.createElement('div');
     bld.className = 'bld';
-    bld.textContent = r.building || '';
+    bld.textContent = m.building || '';
     const rm = win.document.createElement('div');
     rm.className = 'rm';
-    rm.textContent = r.name;
+    rm.textContent = m.name;
+    const tp = win.document.createElement('div');
+    tp.className = 'tp';
+    tp.textContent = meterTypeIcon(m.type) + ' ' + meterTypeLabel(m.type);
     const qrHolder = win.document.createElement('div');
     cell.appendChild(bld);
     cell.appendChild(rm);
+    cell.appendChild(tp);
     cell.appendChild(qrHolder);
     grid.appendChild(cell);
     new QRCode(qrHolder, {
-      text: qrPayloadForRoom(r.building, r.name),
+      text: qrPayloadForMeter(m.building, m.name, m.type),
       width: 120,
       height: 120,
       correctLevel: QRCode.CorrectLevel.M,
@@ -135,7 +153,7 @@ function openQRScanner() {
     .then(stream => {
       qrScanStream = stream;
       video.srcObject = stream;
-      statusEl.textContent = 'เล็ง QR ที่หน้าห้อง';
+      statusEl.textContent = 'เล็ง QR ที่หน้ามิเตอร์';
       scanLoop();
     })
     .catch(err => {
@@ -179,31 +197,30 @@ function scanLoop() {
 }
 
 function handleQRMatch(parsed, statusEl) {
-  const match = getRoomNamesForBuilding('ทั้งหมด').find(
-    r => (r.building || '') === parsed.building && r.name === parsed.name
-  );
-  if (!match) {
-    statusEl.textContent = `ไม่พบห้อง "${parsed.name}" ในระบบ ลองสแกนใหม่`;
+  const meter = findMeter(parsed.building, parsed.name, parsed.type);
+  if (!meter) {
+    statusEl.textContent = `ไม่พบมิเตอร์ "${parsed.name}" (${meterTypeLabel(parsed.type)}) ในระบบ ลองสแกนใหม่`;
     qrScanRAF = requestAnimationFrame(scanLoop);
     return;
   }
   closeQRScanner();
-  // เด้งไปแท็บบันทึก เลือกตึก+ห้องให้อัตโนมัติ
+  // เด้งไปแท็บบันทึก เลือกตึก+ห้อง+ประเภทให้อัตโนมัติ พร้อมกรอกเลขได้ทันที
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.querySelector('.tab-btn[data-tab="readings"]').classList.add('active');
   document.getElementById('tab-readings').classList.add('active');
 
-  selectedBuildingFilter = match.building ? match.building : 'ทั้งหมด';
-  selectedRoomBuilding = match.building;
-  selectedRoomName = match.name;
-  selectedMeterId = null;
+  selectedBuildingFilter = parsed.building ? parsed.building : 'ทั้งหมด';
+  selectedRoomBuilding = parsed.building;
+  selectedRoomName = parsed.name;
+  selectedMeterId = meter.id;
   renderBuildingFilter();
   renderRoomList();
   updateTypeButtons();
   updatePrevInfo();
   if (typeof refreshSheetLatestCache === 'function') refreshSheetLatestCache();
-  toast(`✓ สแกนสำเร็จ: ${match.building ? match.building + ' ' : ''}${match.name} — เลือกประเภทน้ำ/ไฟต่อได้เลย`);
+  document.getElementById('currentReading').focus();
+  toast(`✓ สแกนสำเร็จ: ${parsed.building ? parsed.building + ' ' : ''}${parsed.name} (${meterTypeLabel(parsed.type)}) — กรอกเลขได้เลย`);
 }
 
 document.getElementById('qrFab').addEventListener('click', openQRScanner);
